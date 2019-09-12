@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Entity\User;
 
 
+
 class UserFixtures extends Fixture
 {
 
@@ -22,6 +23,7 @@ class UserFixtures extends Fixture
     {
         $user = new User;
         $user->setUsername('Admin');
+        $user->setApitoken('apitoken');
         $user->setPassword($this->passwordEncoder->encodePassword(
             $user,
             '123456'

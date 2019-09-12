@@ -12,13 +12,16 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use App\Controller\ApiController;
 
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
     private $em;
+    private $apiControll;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, ApiController $apiControll)
     {
+        $this->apiControll = $apiControll;
         $this->em = $em;
     }
 
@@ -50,14 +53,11 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         if (null === $apiToken) {
             return;
         }
-        $userAuth = $this->em->getRepository(User::class);
-        print_r($userAuth);
-        die();
-
-            //->findOneBy(['apiToken' => $apiToken]);
-
+        // throw new CustomUserMessageAuthenticationException(
+        //     'ILuvAPIs is not a real API key: it\'s just a silly phrase'
+        // );
         // if a User object, checkCredentials() is called
-        return $userAuth;
+        return $this->em->getRepository(User::class)->findOneBy(['apitoken' => $apiToken]);
     }
 
     public function checkCredentials($credentials, UserInterface $user)
@@ -78,7 +78,8 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
         $data = [
-            'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
+            'auth' => 'N',
+            //'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
 
             // or to translate this message
             // $this->translator->trans($exception->getMessageKey(), $exception->getMessageData())
