@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ProductController extends ApiController
 {
     /**
-    * @Route("/product")
+    * @Route("/product",  methods={"GET"})
     */
     public function productAction()
     {
