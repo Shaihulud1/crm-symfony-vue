@@ -19,16 +19,18 @@
               {{pageLabel}}
               <!-- Application -->
           </v-toolbar-title>
+          <div class="flex-grow-1"></div>
+          <v-btn tile outlined color="white" @click="reloadTable">
+            <v-icon left>mdi-reload</v-icon>Обновить таблицу
+          </v-btn>
+          <!-- <v-btn icon text>
+            <v-icon>mdi-reload</v-icon>
+            <v-text>Обновить страницу</v-text>
+          </v-btn> -->
         </v-app-bar>
 
         <v-content>
-          <v-container class="fill-height" fluid >
-            <v-row align="center" justify="center" >
-              <v-col class="text-center">
-                  <router-view></router-view>
-              </v-col>
-            </v-row>
-          </v-container>
+            <router-view></router-view>
         </v-content>
       </v-app>
 </template>
@@ -47,6 +49,12 @@ export default {
     },
     props: {
       source: String,
+    },
+    methods:{
+        reloadTable: function(e)
+        {
+            this.$router.go();
+        }
     },
     data: () => ({
         menu: [
