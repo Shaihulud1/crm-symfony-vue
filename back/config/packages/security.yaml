@@ -18,18 +18,14 @@ security:
             security: false
             guard:
                 authenticators:
-                    - App\Security\LoginAuthenticator
                     - App\Security\TokenAuthenticator
-                entry_point: App\Security\LoginAuthenticator
         main:
             anonymous: ~
             logout: ~
             anonymous: true
             guard:
                 authenticators:
-                    - App\Security\LoginAuthenticator
                     - App\Security\TokenAuthenticator
-                entry_point: App\Security\LoginAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -41,6 +37,6 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/rest, roles: ROLE_USER }
-        - { path: ^/api,  roles: ROLE_USER }
+        # - { path: ^/api,  roles: ROLE_USER }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
