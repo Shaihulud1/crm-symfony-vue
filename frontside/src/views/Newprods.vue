@@ -21,12 +21,12 @@
             <v-icon
               small
               class="mr-2"
-              @click="openEditProductModal(item)">
+              @click="productFormModalForm=true">
               edit
             </v-icon>
           </template>
       </v-data-table>
-      <productFormModal></productFormModal>
+      <productFormModal v-model="productFormModalForm"></productFormModal>
   </v-card>
 
 </template>
@@ -34,6 +34,7 @@
   import productFormModal from "../components/Product-edit-form.vue";
 
   export default {
+    name: "NewProductsList",
     components:{
         productFormModal
     },
@@ -41,6 +42,7 @@
     },
     data: () => {
       return {
+        productFormModalForm: false,
         selected:[],
         search: '',
         headers: [
