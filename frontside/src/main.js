@@ -10,6 +10,7 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 Vue.component('basic', basic);
 Vue.component('login', login);
 
+
 /*cut string*/
 var filter = function (text, length, clamp) {
   clamp = clamp || '...';

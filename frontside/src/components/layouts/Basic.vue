@@ -11,7 +11,7 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-          <v-system-bar window dark class="collapsed-product" v-for="prod in collapsedProds" v-bind:key="prod.id_mp">
+          <v-system-bar window class="collapsed-product" v-for="prod in storageData" v-bind:key="prod.id_mp">
             <span>{{ prod.name | truncate(25, '...') }}</span>
             <div class="flex-grow-1"></div>
             <v-icon>mdi-checkbox-blank-outline</v-icon>
@@ -50,6 +50,7 @@
 </style>
 
 <script>
+
 export default {
     computed: {
         pageLabel: function()
@@ -66,12 +67,13 @@ export default {
             this.$router.go();
         }
     },
+    computed:{
+      storageData: function(){
+        console.log('test');
+        return JSON.parse(localStorage.getItem('storageProducts')); 
+      }
+    },
     data: () => ({
-        collapsedProds: [
-            { name: "Нурофен 25 грам с апельсином в упаковке", id_mp: 1321},
-            { name: "Нурофен 25 грам с апельсином в упаковке", id_mp: 1331},
-            { name: "Нурофен 25 грам с апельсином в упаковке", id_mp: 13651},
-        ],
         menu: [
             { name: "Newprods", label: "Новые товары", icon: "mdi-cube-send", link: "/"},
             { name: "Listprods", label: "Список товаров", icon: "mdi-clipboard-list", link: "/list-prods"},

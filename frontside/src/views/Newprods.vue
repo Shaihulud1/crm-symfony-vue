@@ -20,7 +20,7 @@
         >
         <template v-slot:body="{ items }">
           <tbody>
-            <tr v-for="item in items" :key="item.id_mp"  class="product-table-item" @dblclick="openModal">
+            <tr v-for="(item, index) in items" :key="index"  class="product-table-item" @dblclick="openModal(item.id_mp)">
               <td>{{ item.id_mp }}</td>
               <td>{{ item.prod_name }}</td>
               <td>{{ item.date_insert }}</td>
@@ -47,16 +47,37 @@
   export default {
     name: "NewProductsList",
     components:{
-        productFormModal
+        productFormModal,
     },
     methods: {
-      openModal: function(e)
+      openModal: function(id_mp)
       {
+        this.modalData = false;
+        let savedProducts = JSON.parse(localStorage.getItem('storageProducts'));
+        if(savedProducts !== null)
+        {
+            savedProducts.forEach(element => {
+                if(element.id_mp == id_mp){
+                    this.modalData = element;
+                }
+            });
+        }
+        if(!this.modalData)
+        {
+          //get from DB;
+          if(savedProducts == null){
+            savedProducts = [];
+          }
+          this.modalData = {name: 'Nurofen', id_mp: 1488};
+          savedProducts.push(this.modalData);
+          localStorage.setItem('storageProducts', JSON.stringify(savedProducts))
+        }
         this.productFormModalForm = true;
       }
     },
     data: () => {
       return {
+        modalData: {},
         productFormModalForm: false,
         selected:[],
         search: '',
