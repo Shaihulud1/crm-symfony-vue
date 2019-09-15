@@ -2,7 +2,7 @@
       <v-app id="inspire">
         <v-navigation-drawer v-model="drawer" app >
           <v-list dense>
-            <v-list-item  v-for="menuItem in menu" :to="{path:menuItem.link}">
+            <v-list-item  v-for="menuItem in menu" :to="{path:menuItem.link}" v-bind:key="menuItem.name">
               <v-list-item-action>
                 <v-icon>{{menuItem.icon}}</v-icon>
               </v-list-item-action>
@@ -11,6 +11,11 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
+          <v-system-bar window dark class="collapsed-product" v-for="prod in collapsedProds" v-bind:key="prod.id_mp">
+            <span>{{ prod.name | truncate(25, '...') }}</span>
+            <div class="flex-grow-1"></div>
+            <v-icon>mdi-checkbox-blank-outline</v-icon>
+          </v-system-bar>
         </v-navigation-drawer>
 
         <v-app-bar app color="blue" dark >
@@ -35,8 +40,13 @@
       </v-app>
 </template>
 
-<style media="screen">
-
+<style lang="scss">
+  .collapsed-product{
+    cursor: pointer;
+  }
+  .collapsed-product{
+    margin-top: 5px;
+  }
 </style>
 
 <script>
@@ -57,6 +67,11 @@ export default {
         }
     },
     data: () => ({
+        collapsedProds: [
+            { name: "Нурофен 25 грам с апельсином в упаковке", id_mp: 1321},
+            { name: "Нурофен 25 грам с апельсином в упаковке", id_mp: 1331},
+            { name: "Нурофен 25 грам с апельсином в упаковке", id_mp: 13651},
+        ],
         menu: [
             { name: "Newprods", label: "Новые товары", icon: "mdi-cube-send", link: "/"},
             { name: "Listprods", label: "Список товаров", icon: "mdi-clipboard-list", link: "/list-prods"},

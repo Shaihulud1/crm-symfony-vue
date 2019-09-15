@@ -5,10 +5,10 @@
         <v-toolbar color="blue white--text">
           <v-toolbar-title>Товар (*Создание) + Нурофен 2.5 гр</v-toolbar-title>
           <div class="flex-grow-1"></div>
-          <v-btn icon @click="show=false">
+          <v-btn icon @click="collapseProduct">
             <v-icon>mdi-arrow-collapse-left</v-icon>
           </v-btn>
-          <v-btn icon @click="show=false">
+          <v-btn icon @click="closeProduct">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -23,8 +23,8 @@
         
         <v-form lazy-validation>
         <v-card-text>
-          <v-btn class="prod-popup-btn" color="success" @click="submit">Записать и закрыть</v-btn>
-          <v-btn class="prod-popup-btn" color="warning" @click="submit">Закрыть без изменений</v-btn>
+          <v-btn class="prod-popup-btn" color="success" @click="saveProduct">Записать и закрыть</v-btn>
+          <v-btn class="prod-popup-btn" color="warning" @click="closeProduct">Закрыть без изменений</v-btn>
         </v-card-text>
         <v-tabs centered>
           <v-tab>
@@ -164,12 +164,6 @@
                     label="Русское название"
                   >     
                   </v-text-field>                              
-                  <v-text-field
-                    v-model="rusName"
-                    outlined
-                    label="Русское название"
-                  >     
-                  </v-text-field>
                   <v-switch v-model="isRecipeNeeded" label="Товар по рецепту" color="success"></v-switch>                           
               </v-card-text>
             </v-card>
@@ -197,35 +191,60 @@
                   <v-tab-item>
                     <v-card flat>
                       <v-card-text>
-                        test
+                          <v-textarea
+                            background-color="amber lighten-4"
+                            color="blue"
+                            label="Подробное описание"
+                            v-model="detail"
+                          ></v-textarea>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
                   <v-tab-item>
                     <v-card flat>
                       <v-card-text>
-                        test
+                          <v-textarea
+                            background-color="amber lighten-4"
+                            color="blue"
+                            label="Показания к применению"
+                            v-model="howuse"
+                          ></v-textarea>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
                   <v-tab-item>
                     <v-card flat>
                       <v-card-text>
-                        test
+                          <v-textarea
+                            background-color="amber lighten-4"
+                            color="blue"
+                            label="Способ применения"
+                            v-model="methoduse"
+                          ></v-textarea>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
                   <v-tab-item>
                     <v-card flat>
                       <v-card-text>
-                        test
+                          <v-textarea
+                            background-color="amber lighten-4"
+                            color="blue"
+                            label="Состав"
+                            v-model="struct"
+                          ></v-textarea>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
                   <v-tab-item>
                     <v-card flat>
                       <v-card-text>
-                        test
+                          <v-textarea
+                            background-color="amber lighten-4"
+                            color="blue"
+                            label="Противопоказания"
+                            v-model="contra"
+                          ></v-textarea>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
@@ -250,6 +269,20 @@ export default {
     name: "PopupProductEditor",
     props:{
       value:Boolean,
+    },
+    methods: {
+      collapseProduct: function()
+      {
+
+      },
+      closeProduct: function()
+      {
+        this.show = false;
+      },
+      saveProduct: function()
+      {
+
+      }
     },
     computed: {
       processStatus: function()
@@ -304,7 +337,13 @@ export default {
             rusName: "",
             isRecipeNeeded: false,
            /**/
-
+           /*tab3*/
+            detail: "",
+            howuse: "",
+            methoduse: "",
+            struct: "",
+            contra: "",
+           /**/
         /**/
       
       }

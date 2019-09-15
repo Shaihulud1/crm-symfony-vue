@@ -12,24 +12,35 @@
           hide-default-footer
         ></v-text-field>
       </v-card-title>
-      <v-data-table
-        :headers="headers"
-        :items="products"
-        :search="search"
-      >
-          <template v-slot:item.action="{ item }" v-slot:activator="{ on }">
-            <v-icon
-              small
-              class="mr-2"
-              @click="productFormModalForm=true">
-              edit
-            </v-icon>
-          </template>
-      </v-data-table>
+      <v-app>
+        <v-data-table
+          :headers="headers"
+          :items="products"
+          :search="search"
+        >
+        <template v-slot:body="{ items }">
+          <tbody>
+            <tr v-for="item in items" :key="item.id_mp"  class="product-table-item" @dblclick="openModal">
+              <td>{{ item.id_mp }}</td>
+              <td>{{ item.prod_name }}</td>
+              <td>{{ item.date_insert }}</td>
+              <td>{{ item.in_work }}</td>
+            </tr>
+          </tbody>
+        </template>
+        </v-data-table>
+      </v-app>
       <productFormModal v-model="productFormModalForm"></productFormModal>
   </v-card>
 
 </template>
+
+<style lang="scss">
+  .product-table-item{
+    cursor: pointer;
+  }
+</style>
+
 <script>
   import productFormModal from "../components/Product-edit-form.vue";
 
@@ -39,6 +50,10 @@
         productFormModal
     },
     methods: {
+      openModal: function(e)
+      {
+        this.productFormModalForm = true;
+      }
     },
     data: () => {
       return {
@@ -48,47 +63,36 @@
         headers: [
           { text: 'ID Товара', value: 'id_mp' },
           { text: 'Название', value: 'prod_name' },
-          { text: 'В работе', value: 'in_work' },
           { text: 'Дата добавления', value: 'date_insert' },
-          { text: 'Правка', value: 'action', sortable: false },
+          { text: 'В работе', value: 'in_work' },
+          // { text: 'Правка', value: 'action', sortable: false },
         ],
         products: [
           {
             id_mp: 159,
+            prod_name: 'Фенобарбитал',
+            in_work: 1,
+            date_insert: "19.08.2019",
+          },
+          {
+            id_mp: 31,
+            prod_name: 'Ааа',
+            in_work: 1,
+            date_insert: "19.08.2019",
+          },
+          {
+            id_mp: 54,
             prod_name: 'Нурофен',
             in_work: 1,
             date_insert: "19.08.2019",
           },
           {
-            id_mp: 222,
+            id_mp: 23,
             prod_name: 'Ношпа',
             in_work: 0,
             date_insert: "19.08.2019",
           },
-          {
-            id_mp: 21341,
-            prod_name: 'Какой-то товар',
-            in_work: 1,
-            date_insert: "19.08.2019",
-          },
-          {
-            id_mp: 159,
-            prod_name: 'Нурофен',
-            in_work: 1,
-            date_insert: "19.08.2019",
-          },
-          {
-            id_mp: 222,
-            prod_name: 'Ношпа',
-            in_work: 0,
-            date_insert: "19.08.2019",
-          },
-          {
-            id_mp: 21341,
-            prod_name: 'Какой-то товар',
-            in_work: 1,
-            date_insert: "19.08.2019",
-          },
+
         ],
       }
     },

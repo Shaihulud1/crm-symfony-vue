@@ -10,6 +10,17 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 Vue.component('basic', basic);
 Vue.component('login', login);
 
+/*cut string*/
+var filter = function (text, length, clamp) {
+  clamp = clamp || '...';
+  var node = document.createElement('div');
+  node.innerHTML = text;
+  var content = node.textContent;
+  return content.length > length ? content.slice(0, length) + clamp : content;
+};
+Vue.filter('truncate', filter);
+
+
 Vue.config.productionTip = false
 
 new Vue({
