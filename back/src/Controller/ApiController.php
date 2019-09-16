@@ -40,39 +40,45 @@ class ApiController
      *
      * @param array $data
      * @param array $headers
-     *
-     * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function respond($data, $headers = [])
     {
-        return new JsonResponse($data, $this->getStatusCode(), $headers);
+        return $this->response($data, $headers);
     }
 
     /**
      * Sets an error message and returns a JSON response
      *
      * @param string $errors
-     *
-     * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function respondWithErrors($errors, $headers = [])
     {
         $data = [
             'errors' => $errors,
         ];
-
-        return new JsonResponse($data, $this->getStatusCode(), $headers);
+        return $this->response($data, $headers);
     }
 
-    /**
-     * Returns a 401 Unauthorized http response
-     *
-     * @param string $message
-     *
-     * @return Symfony\Component\HttpFoundation\JsonResponse
-     */
+
     public function respondUnauthorized($message = 'Not authorized!')
     {
         return $this->setStatusCode(401)->respondWithErrors($message);
+    }
+
+    private function response($body, $headers)
+    {
+        $response = new \Symfony\Component\HttpFoundation\Response;
+        $response->setContent(json_encode($body));
+        $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Request-Method', '*');
+        if(!empty($headers))
+        {
+            foreach($headers as $key => $val)
+            {
+                $response->headers->set($key, $val);
+            }
+        }
+        return $response;
     }
 }

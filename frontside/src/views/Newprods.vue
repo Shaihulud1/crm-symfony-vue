@@ -43,9 +43,29 @@
 
 <script>
   import productFormModal from "../components/Product-edit-form.vue";
+  import axios from 'axios';
+  import cookie from '../components/Cookie';
 
   export default {
     name: "NewProductsList",
+    beforeCreate: function()
+    {
+        let token = cookie.methods.getCookie("token");
+
+        axios({
+            method: 'get',
+            url: 'http://127.2.2.2/rest/product',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': '*'
+                //'x-access-token': token,
+            },
+        }).then(function(response) {
+            console.log(response);
+        });
+    },
     components:{
         productFormModal,
     },

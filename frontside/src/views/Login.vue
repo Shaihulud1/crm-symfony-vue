@@ -11,10 +11,11 @@
                 </v-toolbar>
                 <v-card-text>
                   <v-form @submit="auth">
-                    <v-text-field label="Логин" name="login" v-model="login" prepend-icon="person" type="text" :rules="emptyRules"></v-text-field>
-                    <v-text-field id="password" label="Пароль" v-model="pass" name="password" prepend-icon="lock" type="password" :rules="emptyRules"></v-text-field>
+                    <v-text-field require label="Логин" name="login" v-model="login" prepend-icon="person" type="text" :rules="emptyRules"></v-text-field>
+                    <v-text-field require id="password" label="Пароль" v-model="pass" name="password" prepend-icon="lock" type="password" :rules="emptyRules"></v-text-field>
                   </v-form>
                 </v-card-text>
+                <v-alert type="error" v-if="error">{{error}}</v-alert>
                 <v-card-actions>
                   <div class="flex-grow-1"></div>
                   <v-btn color="blue white--text" @click="auth">Войти</v-btn>
@@ -28,20 +29,45 @@
 </template>
 
 <script>
+import axios from 'axios';
 
+import cookie from '../components/Cookie';
+import router from '../router';
 
 export default {
     name: "Login",
     methods:{
         auth: function(e)
         {
-            let login = this.login,
-                pass = this.pass;
-            
+            this.error = false;
+            if(!this.login || !this.pass){
+                this.error = "Не все поля заполненны";
+                return;
+            }
+            let self = this,
+                data = new FormData();
+            data.append('username', this.login);
+            data.append('password', this.pass);
+            axios({
+                method: 'post',
+                url: 'http://127.2.2.2/api/login',
+                data: data
+            }).then(function(response) {
+                if(response.data.errors == 'BAD_AUTH')
+                {
+                    self.error = "Неверный логин или пароль";
+                }
+                else if(response.data){
+                    cookie.methods.setCookie('token', response.data);
+                    router.push({path: '/'});
+                }
+                return;
+            });
         },
     },
     data: () => {
         return {
+            error: false,
             login: "",
             pass: "",
             emptyRules: [

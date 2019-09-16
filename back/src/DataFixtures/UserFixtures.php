@@ -25,7 +25,7 @@ class UserFixtures extends Fixture
         $user->setUsername('Admin');
         $user->setApitoken('apitoken');
 
-        $user->setPassword(md5(md5(md5('12345'))));
+        $user->setPassword(md5(md5(md5("12345"))));
         // $user->setPassword($this->passwordEncoder->encodePassword(
         //     $user,
         //     'test'

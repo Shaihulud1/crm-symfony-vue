@@ -16,7 +16,6 @@ class LoginController extends ApiController
      */
     public function login(UserPasswordEncoderInterface $passwordEncoder, Request $request, EntityManagerInterface $em)
     {
-
         $requestData = [
             'username' => $request->request->get("username"),
             'password' => $request->request->get("password")

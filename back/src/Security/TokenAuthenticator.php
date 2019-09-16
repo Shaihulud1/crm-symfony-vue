@@ -19,9 +19,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     private $em;
     private $apiControll;
 
-    public function __construct(EntityManagerInterface $em, ApiController $apiControll)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->apiControll = $apiControll;
+        $this->apiControll = new \App\Controller\ApiController;
         $this->em = $em;
     }
 
@@ -53,10 +53,6 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         if (null === $apiToken) {
             return;
         }
-        // throw new CustomUserMessageAuthenticationException(
-        //     'ILuvAPIs is not a real API key: it\'s just a silly phrase'
-        // );
-        // if a User object, checkCredentials() is called
         return $this->em->getRepository(User::class)->findOneBy(['apitoken' => $apiToken]);
     }
 
@@ -72,33 +68,23 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
         // on success, let the request continue
-        return null;
+        return true;
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        $data = [
-            'auth' => 'N',
-            //'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
-
-            // or to translate this message
-            // $this->translator->trans($exception->getMessageKey(), $exception->getMessageData())
-        ];
-
-        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
+        return $apiControll->respond("BAD_AUTH");
     }
 
     /**
-     * Called when authentication is needed, but it's not sent
+     * Called when authentication is needed but it's not sent
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
         $data = [
-            // you might translate this message
             'message' => 'Authentication Required'
         ];
-
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        return $this->apiControll->respondUnauthorized();
     }
 
     public function supportsRememberMe()
