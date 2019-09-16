@@ -10,14 +10,14 @@
                   <div class="flex-grow-1"></div>
                 </v-toolbar>
                 <v-card-text>
-                  <v-form>
-                    <v-text-field label="Логин" name="login" prepend-icon="person" type="text"></v-text-field>
-                    <v-text-field id="password" label="Пароль" name="password" prepend-icon="lock" type="password"></v-text-field>
+                  <v-form @submit="auth">
+                    <v-text-field label="Логин" name="login" v-model="login" prepend-icon="person" type="text" :rules="emptyRules"></v-text-field>
+                    <v-text-field id="password" label="Пароль" v-model="pass" name="password" prepend-icon="lock" type="password" :rules="emptyRules"></v-text-field>
                   </v-form>
                 </v-card-text>
                 <v-card-actions>
                   <div class="flex-grow-1"></div>
-                  <v-btn color="blue white--text">Войти</v-btn>
+                  <v-btn color="blue white--text" @click="auth">Войти</v-btn>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -31,6 +31,23 @@
 
 
 export default {
-
+    name: "Login",
+    methods:{
+        auth: function(e)
+        {
+            let login = this.login,
+                pass = this.pass;
+            
+        },
+    },
+    data: () => {
+        return {
+            login: "",
+            pass: "",
+            emptyRules: [
+              v => !!v || 'Пустое поле',
+            ],
+        }
+    }
 };
 </script>

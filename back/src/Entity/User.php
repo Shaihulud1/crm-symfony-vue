@@ -38,6 +38,11 @@ class User implements UserInterface
      */
     private $apitoken;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $tokenDeathDate;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -122,4 +127,17 @@ class User implements UserInterface
 
         return $this;
     }
+
+    public function getTokenDeathDate(): ?int
+    {
+        return $this->tokenDeathDate;
+    }
+
+    public function setTokenDeathDate(?int $tokenDeathDate): self
+    {
+        $this->tokenDeathDate = $tokenDeathDate;
+
+        return $this;
+    }
+
 }

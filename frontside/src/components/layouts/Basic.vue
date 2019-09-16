@@ -21,7 +21,7 @@
         <v-app-bar app color="blue" dark >
           <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
           <v-toolbar-title>
-              {{pageLabel}}
+              <!-- {{pageLabel}} -->
               <!-- Application -->
           </v-toolbar-title>
           <div class="flex-grow-1"></div>
@@ -69,8 +69,7 @@ export default {
     },
     computed:{
       storageData: function(){
-        console.log('test');
-        return JSON.parse(localStorage.getItem('storageProducts')); 
+        return JSON.parse(localStorage.getItem('storageProducts'));
       }
     },
     data: () => ({

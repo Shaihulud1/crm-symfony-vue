@@ -24,10 +24,12 @@ class UserFixtures extends Fixture
         $user = new User;
         $user->setUsername('Admin');
         $user->setApitoken('apitoken');
-        $user->setPassword($this->passwordEncoder->encodePassword(
-            $user,
-            '123456'
-        ));
+
+        $user->setPassword(md5(md5(md5('12345'))));
+        // $user->setPassword($this->passwordEncoder->encodePassword(
+        //     $user,
+        //     'test'
+        // ));
         $manager->persist($user);
         $manager->flush();
     }

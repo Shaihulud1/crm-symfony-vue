@@ -90,12 +90,6 @@
         ],
         products: [
           {
-            id_mp: 159,
-            prod_name: 'Фенобарбитал',
-            in_work: 1,
-            date_insert: "19.08.2019",
-          },
-          {
             id_mp: 31,
             prod_name: 'Ааа',
             in_work: 1,
