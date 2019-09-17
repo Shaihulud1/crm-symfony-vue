@@ -26,12 +26,6 @@ class ProductController extends ApiController
                 'in_work' => 0,
                 'date_insert' => "19.08.2019",
             ],
-            [
-                'id_mp' => 1231,
-                'prod_name' => 'Ношпа 2',
-                'in_work' => 0,
-                'date_insert' => "19.08.2019",
-            ]
         ]);
     }
 
@@ -40,11 +34,21 @@ class ProductController extends ApiController
     */
     public function singleproductAction($id)
     {
-        return $this->respond([
-            'id_mp' => 242,
-            'prod_name' => 'Ношпа',
-            'in_work' => 1,
-            'date_insert' => "19.08.2019",
-        ]);
+        if($id == '242')
+        {
+            return $this->respond([
+                'id_mp' => 242,
+                'prod_name' => 'Нурофен',
+                'in_work' => 1,
+                'date_insert' => "19.08.2019",
+            ]);
+        }else{
+            return $this->respond([
+                'id_mp' => 543,
+                'prod_name' => 'Ношпа',
+                'in_work' => 1,
+                'date_insert' => "19.08.2019",
+            ]);
+        }
     }
 }

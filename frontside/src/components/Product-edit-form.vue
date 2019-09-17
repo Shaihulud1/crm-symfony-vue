@@ -267,7 +267,7 @@
 
 export default {
     mounted: function(){
-        console.log(this);
+    
     },
     name: "PopupProductEditor",
     props:{

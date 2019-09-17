@@ -4,6 +4,7 @@
 
 <script>
   export default {
+    name:"LoginLayout",
     props: {
       source: String,
     },

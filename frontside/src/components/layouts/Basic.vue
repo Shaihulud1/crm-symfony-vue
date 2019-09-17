@@ -11,18 +11,17 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-          <!-- <v-system-bar window class="collapsed-product" v-for="prod in storageData" v-bind:key="prod.id_mp">
+          <v-system-bar window class="collapsed-product" v-for="prod in collapsedStorage" v-bind:key="prod.id_mp">
             <span>{{ prod.name | truncate(25, '...') }}</span>
             <div class="flex-grow-1"></div>
             <v-icon>mdi-checkbox-blank-outline</v-icon>
-          </v-system-bar> -->
+          </v-system-bar>
         </v-navigation-drawer>
 
         <v-app-bar app color="blue" dark >
           <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
           <v-toolbar-title>
-              <!-- {{pageLabel}} -->
-              <!-- Application -->
+              {{pageLabel}}
           </v-toolbar-title>
           <div class="flex-grow-1"></div>
           <v-btn tile outlined color="white" @click="reloadTable">
@@ -35,7 +34,7 @@
         </v-app-bar>
 
         <v-content>
-            <router-view></router-view>
+            <router-view :collapsedStorage="collapsedStorage"></router-view>
         </v-content>
       </v-app>
 </template>
@@ -53,23 +52,37 @@
 import router from '../../router';
 
 export default {
-    computed: {
-        pageLabel: function()
-        {
-            return this.$route.meta.label || "";
-        }
-    },
+    name:"BasicLayout",
     props: {
       source: String,
     },
     methods:{
         reloadTable: function(e)
         {
-            this.$router.go();
+            this.collapsedStorage = [{name:'test', id_mp: 1231}];
+            //this.$router.go();
         }
     },
     computed:{
-      storageData: function(){
+      collapsedStorage:
+      {
+          get: function()
+          {
+              return JSON.parse(localStorage.getItem('collapsedStorage'));
+          },
+          set: function(val)
+          {
+              localStorage.setItem('collapsedStorage', JSON.stringify(val));
+          }
+      },
+
+      pageLabel: function()
+      {
+            return this.$route.meta.label || "";
+      },
+
+      storageData: function()
+      {
         return JSON.parse(localStorage.getItem('storageProducts'));
       }
     },

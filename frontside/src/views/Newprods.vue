@@ -44,6 +44,7 @@
   import axios from 'axios';
   import cookie from '../components/Cookie';
   import router from '../router';
+  import basic from '../components/layouts/Basic';
 
   export default {
     name: "NewProductsList",
@@ -79,6 +80,7 @@
     },
     components:{
         productFormModal,
+        basic
     },
     methods: {
       openModal: function(id_mp)
@@ -92,14 +94,30 @@
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
               }else{
-                 self.modalData = {
-                     id_mp: response.data.id_mp || "",
-                     name: response.data.prod_name || "",
-                 };
-                 self.productFormModalForm = true;
+                  let modalProduct = false;
+                  let storageData = JSON.parse(localStorage.getItem('collapsedStorage')) || [];
+                  if(storageData.length > 0)
+                  {
+                      storageData.forEach(function(elem){
+                          if(elem.id_mp == id_mp){
+                              modalProduct = elem;
+                          }
+                      });
+                  }
+                  if(!modalProduct){
+                      modalProduct = response.data;
+                      storageData.push(modalProduct);
+                      basic.computed.collapsedStorage.set(storageData);
+                  }
+                  self.modalData = {
+                     id_mp: modalProduct.id_mp || "",
+                     name: modalProduct.prod_name || "",
+                  };
+                  self.productFormModalForm = true;
               }
           }).catch(error => {
-              router.push('login');
+              console.log(error);
+              //router.push('login');
           });;
         // this.modalData = false;
         // let savedProducts = JSON.parse(localStorage.getItem('storageProducts'));
