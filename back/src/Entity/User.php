@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -42,6 +44,16 @@ class User implements UserInterface
      * @ORM\Column(type="integer", nullable=true)
      */
     private $tokenDeathDate;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\InWork", mappedBy="user", orphanRemoval=true)
+     */
+    private $inWorks;
+
+    public function __construct()
+    {
+        $this->inWorks = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -136,6 +148,37 @@ class User implements UserInterface
     public function setTokenDeathDate(?int $tokenDeathDate): self
     {
         $this->tokenDeathDate = $tokenDeathDate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|InWork[]
+     */
+    public function getInWorks(): Collection
+    {
+        return $this->inWorks;
+    }
+
+    public function addInWork(InWork $inWork): self
+    {
+        if (!$this->inWorks->contains($inWork)) {
+            $this->inWorks[] = $inWork;
+            $inWork->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInWork(InWork $inWork): self
+    {
+        if ($this->inWorks->contains($inWork)) {
+            $this->inWorks->removeElement($inWork);
+            // set the owning side to null (unless already changed)
+            if ($inWork->getUser() === $this) {
+                $inWork->setUser(null);
+            }
+        }
 
         return $this;
     }

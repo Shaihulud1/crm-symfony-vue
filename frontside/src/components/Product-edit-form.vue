@@ -14,13 +14,13 @@
         </v-toolbar>
 
         <v-card-title class="headline">
-          ID: 1321 <br>
-          Название из Вита-системы: Нурофен 2.5 гр
+          ID: {{ id_mp }} <br>
+          Название из Вита-системы: {{ name }}
         </v-card-title>
         <v-card-text>
           <v-switch v-model="isProductProcessed" v-bind:label="processStatus" color="success" hide-details disabled></v-switch>
         </v-card-text>
-        
+
         <v-form lazy-validation>
         <v-card-text>
           <v-btn class="prod-popup-btn" color="success" @click="saveProduct">Записать и закрыть</v-btn>
@@ -97,8 +97,8 @@
                     v-model="formProdShort"
                     outlined
                     readonly
-                  >         
-                  </v-text-field>         
+                  >
+                  </v-text-field>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -126,45 +126,45 @@
                     label="Форма выпуска"
                     outlined
                     >
-                  </v-select> 
+                  </v-select>
                   <v-text-field
                     v-model="dosage"
                     :rules="dosageRules"
                     outlined
                     label="Дозировка"
                   >
-                  </v-text-field>                                   
+                  </v-text-field>
                   <v-text-field
                     v-model="unit"
                     outlined
                     label="Единица измерения"
                   >
-                  </v-text-field>                                   
+                  </v-text-field>
                   <v-text-field
                     v-model="volume"
                     outlined
                     label="Кол-во (объем) в упаковке"
                   >
-                  </v-text-field>                                   
+                  </v-text-field>
                   <v-text-field
                     v-model="storageCond"
                     outlined
                     label="Условия хранения"
                   >
-                  </v-text-field>                                   
+                  </v-text-field>
                   <v-text-field
                     v-model="latinName"
                     outlined
                     label="Название на латинице"
-                  >     
-                  </v-text-field>                              
+                  >
+                  </v-text-field>
                   <v-text-field
                     v-model="rusName"
                     outlined
                     label="Русское название"
-                  >     
-                  </v-text-field>                              
-                  <v-switch v-model="isRecipeNeeded" label="Товар по рецепту" color="success"></v-switch>                           
+                  >
+                  </v-text-field>
+                  <v-switch v-model="isRecipeNeeded" label="Товар по рецепту" color="success"></v-switch>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -253,7 +253,7 @@
             </v-card>
           </v-tab-item>
 
-              
+
         </v-tabs>
 
         </v-form>
@@ -266,9 +266,20 @@
 
 
 export default {
+    mounted: function(){
+        console.log(this);
+    },
     name: "PopupProductEditor",
     props:{
       value:Boolean,
+      modalData:Object,
+    },
+    watch: {
+        modalData: function(val)
+        {
+            this.id_mp = val.id_mp || "";
+            this.name = val.name || "";
+        }
     },
     methods: {
       collapseProduct: function()
@@ -297,13 +308,14 @@ export default {
           this.$emit('input', value)
         },
       }
-    },    
+    },
     data: () => {
       return {
         isProductProcessed: true,
         /*form*/
           /*tab1*/
-            name: "",
+            id_mp: 124,
+            name: "Ношпа",
             nameRules: [
               v => !!v || 'Название не может быть пустым',
               v => (v && v.length > 2) || 'Неверное заполнение',
@@ -345,7 +357,7 @@ export default {
             contra: "",
            /**/
         /**/
-      
+
       }
     }
 };

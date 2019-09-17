@@ -7,16 +7,14 @@
           append-icon="search"
           label="Поиск"
           single-line
-          hide-details
-          hide-default-header
-          hide-default-footer
         ></v-text-field>
       </v-card-title>
       <v-app>
         <v-data-table
           :headers="headers"
-          :items="products"
+          :items="newProdsList"
           :search="search"
+          hide-default-footer
         >
         <template v-slot:body="{ items }">
           <tbody>
@@ -30,7 +28,7 @@
         </template>
         </v-data-table>
       </v-app>
-      <productFormModal v-model="productFormModalForm"></productFormModal>
+      <productFormModal v-model="productFormModalForm" :modalData="modalData"></productFormModal>
   </v-card>
 
 </template>
@@ -45,26 +43,39 @@
   import productFormModal from "../components/Product-edit-form.vue";
   import axios from 'axios';
   import cookie from '../components/Cookie';
+  import router from '../router';
 
   export default {
     name: "NewProductsList",
-    beforeCreate: function()
+    mounted: function()
     {
-        let token = cookie.methods.getCookie("token");
-
+        let token = cookie.methods.getCookie("token"),
+            self = this;
         axios({
             method: 'get',
-            url: 'http://127.2.2.2/rest/product',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Methods': '*'
-                //'x-access-token': token,
-            },
+            url: 'http://127.2.2.2/rest/product?auth=' + token,
         }).then(function(response) {
-            console.log(response);
+            if(response.data == 'BAD_AUTH'){
+                router.push('login');
+            }else{
+                self.newProdsList = response.data;
+            }
+        }).catch(error => {
+            router.push('login');
         });
+    },
+    computed: {
+        newProdsList:{
+            get: function()
+            {
+                return this.products;
+            },
+            set: function(val)
+            {
+                this.products = val;
+                return this.products;
+            },
+        }
     },
     components:{
         productFormModal,
@@ -72,32 +83,52 @@
     methods: {
       openModal: function(id_mp)
       {
-        this.modalData = false;
-        let savedProducts = JSON.parse(localStorage.getItem('storageProducts'));
-        if(savedProducts !== null)
-        {
-            savedProducts.forEach(element => {
-                if(element.id_mp == id_mp){
-                    this.modalData = element;
-                }
-            });
-        }
-        if(!this.modalData)
-        {
-          //get from DB;
-          if(savedProducts == null){
-            savedProducts = [];
-          }
-          this.modalData = {name: 'Nurofen', id_mp: 1488};
-          savedProducts.push(this.modalData);
-          localStorage.setItem('storageProducts', JSON.stringify(savedProducts))
-        }
-        this.productFormModalForm = true;
+          let token = cookie.methods.getCookie("token"),
+              self = this;
+          axios({
+              method: 'get',
+              url: 'http://127.2.2.2/rest/product/'+id_mp+'?auth=' + token,
+          }).then(function(response) {
+              if(response.data == 'BAD_AUTH'){
+                  router.push('login');
+              }else{
+                 self.modalData = {
+                     id_mp: response.data.id_mp || "",
+                     name: response.data.prod_name || "",
+                 };
+                 self.productFormModalForm = true;
+              }
+          }).catch(error => {
+              router.push('login');
+          });;
+        // this.modalData = false;
+        // let savedProducts = JSON.parse(localStorage.getItem('storageProducts'));
+        // if(savedProducts !== null)
+        // {
+        //     savedProducts.forEach(element => {
+        //         if(element.id_mp == id_mp){
+        //             this.modalData = element;
+        //         }
+        //     });
+        // }
+        // if(!this.modalData)
+        // {
+        //   //get from DB;
+        //   if(savedProducts == null){
+        //     savedProducts = [];
+        //   }
+        //   this.modalData = {name: 'Nurofen', id_mp: 676};
+        //   savedProducts.push(this.modalData);
+        //   localStorage.setItem('storageProducts', JSON.stringify(savedProducts))
+        // }
+
+
+
       }
     },
     data: () => {
       return {
-        modalData: {},
+        modalData: {name: 'Нурофен'},
         productFormModalForm: false,
         selected:[],
         search: '',
@@ -108,27 +139,7 @@
           { text: 'В работе', value: 'in_work' },
           // { text: 'Правка', value: 'action', sortable: false },
         ],
-        products: [
-          {
-            id_mp: 31,
-            prod_name: 'Ааа',
-            in_work: 1,
-            date_insert: "19.08.2019",
-          },
-          {
-            id_mp: 54,
-            prod_name: 'Нурофен',
-            in_work: 1,
-            date_insert: "19.08.2019",
-          },
-          {
-            id_mp: 23,
-            prod_name: 'Ношпа',
-            in_work: 0,
-            date_insert: "19.08.2019",
-          },
-
-        ],
+        products: [],
       }
     },
   }

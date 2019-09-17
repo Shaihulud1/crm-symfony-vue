@@ -18,6 +18,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 {
     private $em;
     private $apiControll;
+    private $token;
 
     public function __construct(EntityManagerInterface $em)
     {
@@ -32,7 +33,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        return $request->headers->has('X-AUTH-TOKEN');
+        $this->token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        return $this->token;
+        //return $request->headers->has('X-AUTH-TOKEN');
     }
 
     /**
@@ -42,14 +45,14 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request)
     {
         return [
-            'token' => $request->headers->get('X-AUTH-TOKEN'),
+            'token' => $this->token,
+            //'token' => $request->headers->get('X-AUTH-TOKEN'),
         ];
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         $apiToken = $credentials['token'];
-
         if (null === $apiToken) {
             return;
         }
@@ -68,12 +71,12 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
         // on success, let the request continue
-        return true;
+        return null;
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        return $apiControll->respond("BAD_AUTH");
+        return $this->apiControll->respond("BAD_AUTH");
     }
 
     /**

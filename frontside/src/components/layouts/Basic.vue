@@ -11,11 +11,11 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-          <v-system-bar window class="collapsed-product" v-for="prod in storageData" v-bind:key="prod.id_mp">
+          <!-- <v-system-bar window class="collapsed-product" v-for="prod in storageData" v-bind:key="prod.id_mp">
             <span>{{ prod.name | truncate(25, '...') }}</span>
             <div class="flex-grow-1"></div>
             <v-icon>mdi-checkbox-blank-outline</v-icon>
-          </v-system-bar>
+          </v-system-bar> -->
         </v-navigation-drawer>
 
         <v-app-bar app color="blue" dark >
