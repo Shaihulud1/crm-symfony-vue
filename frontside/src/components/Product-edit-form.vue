@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="show">
+    <v-dialog v-model="show" persistent>
       <v-card>
 
         <v-toolbar color="blue white--text">
@@ -264,21 +264,43 @@
 
 <script>
 
+import axios from 'axios';
+import cookie from '../components/Cookie';
 
 export default {
-    mounted: function(){
-
-    },
     name: "PopupProductEditor",
     props:{
       value:Boolean,
       modalData:Object,
+      uploadInputs: Boolean,
     },
     watch: {
         modalData: function(val)
         {
             this.id_mp = val.id_mp || "";
             this.name = val.name || "";
+        }
+    },
+    mounted: function()
+    {
+        if(!this.selectData && this.uploadInputs)
+        {
+            var inputs = ["brand", "section", "prop", "prodform"],
+                self = this,
+                token = cookie.methods.getCookie("token");
+
+            self.selectData = true;
+            inputs.forEach(function(action){
+                axios({
+                    method: 'get',
+                    url: 'http://127.2.2.2/rest/inputs/'+action+'?auth=' + token,
+                }).then(function(response) {
+
+                }).catch(error => {
+                    console.log(error);
+                });
+            });
+
         }
     },
     methods: {
@@ -319,9 +341,14 @@ export default {
     },
     data: () => {
       return {
+        selectData: false,
         isProductProcessed: true,
         /*form*/
           /*tab1*/
+            brandItems: [],
+            sectionItems: [],
+            propItems: [],
+            prodItems: [],
             id_mp: 124,
             name: "Ношпа",
             nameRules: [
