@@ -267,7 +267,7 @@
 
 export default {
     mounted: function(){
-    
+
     },
     name: "PopupProductEditor",
     props:{
@@ -284,11 +284,19 @@ export default {
     methods: {
       collapseProduct: function()
       {
-
+          this.show = false;
       },
       closeProduct: function()
       {
-        this.show = false;
+          if(confirm("Вы уверены, что хотите закрыть товар? Изменения не будут сохранены.")){
+              let self = this;
+              self.collapsedProducts.forEach(function(elem, key){
+                  if(elem.id_mp == self.id_mp){
+                      self.collapsedProducts.splice(key, 1);
+                  }
+              });
+              this.show = false;
+          }
       },
       saveProduct: function()
       {

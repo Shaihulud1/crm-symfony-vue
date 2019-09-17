@@ -11,8 +11,8 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-          <v-system-bar window class="collapsed-product" v-for="prod in collapsedStorage" v-bind:key="prod.id_mp">
-            <span>{{ prod.name | truncate(25, '...') }}</span>
+          <v-system-bar window class="collapsed-product" v-for="prod in collapsedProducts" v-bind:key="prod.id_mp" @click="openCollapse(prod.id_mp)">
+            <span>{{ prod.prod_name | truncate(25, '...') }}</span>
             <div class="flex-grow-1"></div>
             <v-icon>mdi-checkbox-blank-outline</v-icon>
           </v-system-bar>
@@ -34,8 +34,9 @@
         </v-app-bar>
 
         <v-content>
-            <router-view :collapsedStorage="collapsedStorage"></router-view>
+            <router-view ></router-view>
         </v-content>
+         <productFormModal v-model="productFormModalForm" :modalData="modalData"></productFormModal>
       </v-app>
 </template>
 
@@ -50,6 +51,8 @@
 
 <script>
 import router from '../../router';
+import newprods from '../../views/Newprods';
+import productFormModal from "../../components/Product-edit-form.vue";
 
 export default {
     name:"BasicLayout",
@@ -57,36 +60,38 @@ export default {
       source: String,
     },
     methods:{
+        openCollapse: function(id_mp)
+        {
+            let modalProduct = false;
+            this.collapsedProducts.forEach(function(elem){
+                if(elem.id_mp == id_mp){
+                    modalProduct = elem;
+                }
+            });
+            this.modalData = {
+               id_mp: modalProduct.id_mp || "",
+               name: modalProduct.prod_name || "",
+            };
+            this.productFormModalForm = true;
+        },
         reloadTable: function(e)
         {
-            this.collapsedStorage = [{name:'test', id_mp: 1231}];
+
             //this.$router.go();
         }
     },
     computed:{
-      collapsedStorage:
-      {
-          get: function()
-          {
-              return JSON.parse(localStorage.getItem('collapsedStorage'));
-          },
-          set: function(val)
-          {
-              localStorage.setItem('collapsedStorage', JSON.stringify(val));
-          }
-      },
-
       pageLabel: function()
       {
             return this.$route.meta.label || "";
       },
-
-      storageData: function()
-      {
-        return JSON.parse(localStorage.getItem('storageProducts'));
-      }
+    },
+    components:{
+        productFormModal
     },
     data: () => ({
+        modalData: {},
+        productFormModalForm: false,
         menu: [
             { name: "Newprods", label: "Новые товары", icon: "mdi-cube-send", link: "/"},
             { name: "Listprods", label: "Список товаров", icon: "mdi-clipboard-list", link: "/list-prods"},

@@ -44,7 +44,6 @@
   import axios from 'axios';
   import cookie from '../components/Cookie';
   import router from '../router';
-  import basic from '../components/layouts/Basic';
 
   export default {
     name: "NewProductsList",
@@ -79,8 +78,7 @@
         }
     },
     components:{
-        productFormModal,
-        basic
+        productFormModal
     },
     methods: {
       openModal: function(id_mp)
@@ -95,10 +93,9 @@
                   router.push('login');
               }else{
                   let modalProduct = false;
-                  let storageData = JSON.parse(localStorage.getItem('collapsedStorage')) || [];
-                  if(storageData.length > 0)
+                  if(self.collapsedProducts.length > 0)
                   {
-                      storageData.forEach(function(elem){
+                      self.collapsedProducts.forEach(function(elem){
                           if(elem.id_mp == id_mp){
                               modalProduct = elem;
                           }
@@ -106,8 +103,7 @@
                   }
                   if(!modalProduct){
                       modalProduct = response.data;
-                      storageData.push(modalProduct);
-                      basic.computed.collapsedStorage.set(storageData);
+                      self.collapsedProducts.push(modalProduct);
                   }
                   self.modalData = {
                      id_mp: modalProduct.id_mp || "",
@@ -117,36 +113,12 @@
               }
           }).catch(error => {
               console.log(error);
-              //router.push('login');
-          });;
-        // this.modalData = false;
-        // let savedProducts = JSON.parse(localStorage.getItem('storageProducts'));
-        // if(savedProducts !== null)
-        // {
-        //     savedProducts.forEach(element => {
-        //         if(element.id_mp == id_mp){
-        //             this.modalData = element;
-        //         }
-        //     });
-        // }
-        // if(!this.modalData)
-        // {
-        //   //get from DB;
-        //   if(savedProducts == null){
-        //     savedProducts = [];
-        //   }
-        //   this.modalData = {name: 'Nurofen', id_mp: 676};
-        //   savedProducts.push(this.modalData);
-        //   localStorage.setItem('storageProducts', JSON.stringify(savedProducts))
-        // }
-
-
-
+          });
       }
     },
     data: () => {
       return {
-        modalData: {name: 'Нурофен'},
+        modalData: {},
         productFormModalForm: false,
         selected:[],
         search: '',

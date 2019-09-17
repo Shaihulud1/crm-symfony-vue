@@ -10,8 +10,14 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 Vue.component('basic', basic);
 Vue.component('login', login);
 
+//global local storage plugin
+import persistentState from 'vue-persistent-state'
+const initialState = {
+   collapsedProducts: []
+};
+Vue.use(persistentState, initialState);
 
-/*cut string*/
+/*cut string filter*/
 var filter = function (text, length, clamp) {
   clamp = clamp || '...';
   var node = document.createElement('div');
