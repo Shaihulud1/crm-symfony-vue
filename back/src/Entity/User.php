@@ -50,6 +50,11 @@ class User implements UserInterface
      */
     private $inWorks;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $fullname;
+
     public function __construct()
     {
         $this->inWorks = new ArrayCollection();
@@ -179,6 +184,18 @@ class User implements UserInterface
                 $inWork->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFullname(): ?string
+    {
+        return $this->fullname;
+    }
+
+    public function setFullname(string $fullname): self
+    {
+        $this->fullname = $fullname;
 
         return $this;
     }
