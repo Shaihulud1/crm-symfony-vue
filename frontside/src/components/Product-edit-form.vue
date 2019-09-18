@@ -53,8 +53,9 @@
                   </v-text-field>
                   <v-select
                     v-model="brand"
-                    :items="brandSelect"
                     label="Бренд"
+                    :items="brandSelect"
+
                     outlined
                     >
                   </v-select>
@@ -71,6 +72,7 @@
                     :rules="requiredSelectRules"
                     :items="sectionSelect"
                     label="Раздел"
+                    @change="changeSect"
                     outlined
                     required
                     >
@@ -80,6 +82,7 @@
                     :rules="requiredSelectRules"
                     :items="subSectionSelect"
                     label="Подраздел"
+                    @change="changeSubsect"
                     outlined
                     required
                     >
@@ -252,12 +255,8 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
-
-
         </v-tabs>
-
         </v-form>
-
       </v-card>
       </v-dialog>
 </template>
@@ -283,19 +282,65 @@ export default {
         }
     },
     methods: {
+      changeSubsect: function(e)
+      {
+          let self = this;
+          let tempSubsect = [];
+          if(typeof this.sectionStorage !== 'undefined')
+          {
+              this.sectionStorage.forEach(function(sect, indexSect){
+                 if(typeof sect.childs !== 'undefined'){
+                     let inSect = false;
+                     sect.childs.forEach(function(child){
+                         if(e == child.id){
+                             self.section = {value: sect.id, text: sect.name};
+                             inSect = true;
+                         }
+                     });
+                     self.sectionStorage[indexSect].childs.forEach(function(child, indexChild){
+                         tempSubsect.push({text:child.name, value:child.id, disabled: inSect ? false : true})
+                     });
+                 }
+              });
+          }
+          this.subSectionSelect = tempSubsect;
+      },
+      changeSect: function(e)
+      {
+          let self = this;
+          let tempSubsect = [];
+          if(typeof this.sectionStorage !== 'undefined')
+          {
+              this.sectionStorage.forEach(function(sect, indexSect){
+                  let inSect = e == sect.id ? false : true;
+                  sect.childs.forEach(function(child){
+                      let tempSect = {value:child.id, text:child.name};
+                      tempSect.disabled = inSect;
+                      tempSubsect.push(tempSect);
+                      if(self.subsection == child.id){
+                         console.log(self.subsection); 
+                      }
+                  });
+              });
+          }
+          self.subSectionSelect = tempSubsect;
+      },
       getSelect: function(select, getChild = false)
       {
           let result = [];
           if(typeof select !== 'undefined' && select.length > 0){
               select.forEach(function(val){
+                  let insertObj = {};
                   if(!getChild)
                   {
-                      result.push(val.name);
+                      insertObj = {'text' : val.name, 'value' : val.id};
+                      result.push(insertObj);
                   }
                   else if(typeof val.childs !== 'undefined' && val.childs.length > 0)
                   {
                       val.childs.forEach(function(childVal){
-                          result.push(childVal.name);
+                          insertObj = {'text' : childVal.name, 'value' : childVal.id};
+                          result.push(insertObj);
                       });
                   }
               });
@@ -330,19 +375,45 @@ export default {
       gammaSelect: function(){
           return this.getSelect(this.brandStorage, true);
       },
-      sectionSelect: function()
+      // sectionSelect: function()
+      // {
+      //     return this.getSelect(this.sectionStorage);
+      // },
+      sectionSelect:
       {
-          return this.getSelect(this.sectionStorage);
+          set: function(val)
+          {
+              this.sectionSelectData = val;
+          },
+          get: function()
+          {
+              if(typeof this.sectionSelectData !== 'undefined' && this.sectionSelectData.length < 1)
+              {
+                  this.sectionSelectData = this.getSelect(this.sectionStorage);
+              }
+              return this.sectionSelectData;
+          }
       },
-      subSectionSelect: function()
-      {
-          return this.getSelect(this.sectionStorage, true);
+      subSectionSelect:{
+          set: function(val)
+          {
+              this.subSectionSelectData = val;
+          },
+          get: function()
+          {
+              if(typeof this.subSectionSelectData !== 'undefined' && this.subSectionSelectData.length < 1)
+              {
+                  this.subSectionSelectData = this.getSelect(this.sectionStorage, true);
+              }
+              return this.subSectionSelectData;
+          }
+
       },
       prodformSelect: function()
       {
           return this.getSelect(this.prodformStorage);
       },
-      
+
 
       processStatus: function()
       {
@@ -359,6 +430,8 @@ export default {
     },
     data: () => {
       return {
+        sectionSelectData: [],
+        subSectionSelectData: [],
         selectData: false,
         isProductProcessed: true,
         /*form*/
@@ -380,7 +453,7 @@ export default {
             formProd: "",
             formProdShort:"",
             requiredSelectRules: [
-              v => v.length > 0 || 'Должен быть выбран элемент',
+                v => !!v || 'Название не может быть пустым',
             ],
            /**/
            /*tab2*/
