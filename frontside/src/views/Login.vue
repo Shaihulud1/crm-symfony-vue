@@ -2,7 +2,7 @@
     <v-app id="inspire">
       <v-content>
         <v-container class="fill-height" fluid>
-          <v-row align="center"justify="center" >
+          <v-row align="center" justify="center" >
             <v-col cols="12" sm="8" md="4">
               <v-card class="elevation-12">
                 <v-toolbar color="blue" dark flat >
@@ -29,13 +29,16 @@
 </template>
 
 <script>
-import axios from 'axios';
 
 import cookie from '../components/Cookie';
+import axiosXHR from '../components/AxiosXHR';
 import router from '../router';
 
 export default {
     name: "Login",
+    components: {
+        axiosXHR
+    },
     methods:{
         auth: function(e)
         {
@@ -44,15 +47,11 @@ export default {
                 this.error = "Не все поля заполненны";
                 return;
             }
-            let self = this,
-                data = new FormData();
+            let self = this;
+            let data = new FormData();
             data.append('username', this.login);
             data.append('password', this.pass);
-            axios({
-                method: 'post',
-                url: 'http://127.2.2.2/api/login',
-                data: data
-            }).then(function(response) {
+            axiosXHR.methods.sendRequest('api/login', function(response){
                 if(response.data.errors == 'BAD_AUTH')
                 {
                     self.error = "Неверный логин или пароль";
@@ -61,8 +60,8 @@ export default {
                     cookie.methods.setCookie('token', response.data);
                     router.push({path: '/'});
                 }
-                return;
-            });
+                return; 
+            }, 'post', data);
         },
     },
     data: () => {

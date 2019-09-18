@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class InputController extends ApiController
 {
     /**
-     * @Route("/brands",  methods={"GET"})
+     * @Route("/brand",  methods={"GET"})
      */
     public function brandAction()
     {
@@ -75,7 +75,7 @@ class InputController extends ApiController
     }
 
     /**
-     * @Route("/props",  methods={"GET"})
+     * @Route("/prop",  methods={"GET"})
      */
     public function propAction()
     {

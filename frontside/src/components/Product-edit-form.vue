@@ -266,6 +266,7 @@
 
 import axios from 'axios';
 import cookie from '../components/Cookie';
+import axiosXHR from '../components/AxiosXHR';
 
 export default {
     name: "PopupProductEditor",
@@ -291,13 +292,24 @@ export default {
 
             self.selectData = true;
             inputs.forEach(function(action){
-                axios({
-                    method: 'get',
-                    url: 'http://127.2.2.2/rest/inputs/'+action+'?auth=' + token,
-                }).then(function(response) {
-
-                }).catch(error => {
-                    console.log(error);
+                var self = this;
+                axiosXHR.methods.sendRequest('rest/inputs/'+action, function(response){
+                    if(response.data == 'BAD_AUTH'){
+                        router.push('login');
+                    }else{
+                        if(response.data.length > 0){
+                          response.data.forEach(function(elem){
+                            let itemsElem = action + 'Items';
+                            //console.log(self1);
+                            //self.itemsElem.push(elem.name);
+                          });
+                        }
+                        // brandItems: [],
+                        // sectionItems: [],
+                        // propItems: [],
+                        // prodItems: [],
+                        console.log(response);
+                    }
                 });
             });
 

@@ -41,27 +41,21 @@
 
 <script>
   import productFormModal from "../components/Product-edit-form.vue";
-  import axios from 'axios';
   import cookie from '../components/Cookie';
+  import axiosXHR from '../components/AxiosXHR';
   import router from '../router';
 
   export default {
     name: "NewProductsList",
     mounted: function()
     {
-        let token = cookie.methods.getCookie("token"),
-            self = this;
-        axios({
-            method: 'get',
-            url: 'http://127.2.2.2/rest/product?auth=' + token,
-        }).then(function(response) {
+        let self = this;
+        axiosXHR.methods.sendRequest('rest/product', function(response){
             if(response.data == 'BAD_AUTH'){
                 router.push('login');
             }else{
                 self.newProdsList = response.data;
             }
-        }).catch(error => {
-            router.push('login');
         });
     },
     computed: {
@@ -78,17 +72,14 @@
         }
     },
     components:{
-        productFormModal
+        productFormModal,
+        axiosXHR
     },
     methods: {
       openModal: function(id_mp)
       {
-          let token = cookie.methods.getCookie("token"),
-              self = this;
-          axios({
-              method: 'get',
-              url: 'http://127.2.2.2/rest/product/'+id_mp+'?auth=' + token,
-          }).then(function(response) {
+          let self = this;
+          axiosXHR.methods.sendRequest('rest/product/' + id_mp, function(response){
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
               }else{
@@ -111,8 +102,6 @@
                   };
                   self.productFormModalForm = true;
               }
-          }).catch(error => {
-              console.log(error);
           });
       }
     },

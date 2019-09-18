@@ -11,10 +11,11 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-          <v-system-bar window class="collapsed-product" v-for="prod in collapsedProducts" v-bind:key="prod.id_mp" @click="openCollapse(prod.id_mp)">
-            <span>{{ prod.prod_name | truncate(25, '...') }}</span>
+          <v-system-bar window class="collapsed-product" v-for="prod in collapsedProducts" v-bind:key="prod.id_mp">
+            <span @click="openCollapse(prod.id_mp)">{{ prod.prod_name | truncate(25, '...') }}</span>
             <div class="flex-grow-1"></div>
-            <v-icon>mdi-checkbox-blank-outline</v-icon>
+            <v-icon @click="openCollapse(prod.id_mp)">mdi-checkbox-blank-outline</v-icon>
+            <!-- <v-icon @click="closeProduct(prod.id_mp)">mdi-close</v-icon> -->
           </v-system-bar>
         </v-navigation-drawer>
 
@@ -36,7 +37,7 @@
         <v-content>
             <router-view ></router-view>
         </v-content>
-         <productFormModal v-model="productFormModalForm" :modalData="modalData"></productFormModal>
+         <productFormModal v-model="productFormModalForm" :modalData="modalData" :uploadInputs=true></productFormModal>
       </v-app>
 </template>
 
@@ -60,6 +61,17 @@ export default {
       source: String,
     },
     methods:{
+        closeProduct: function(id_mp)
+        {
+            if(confirm("Вы уверены, что хотите закрыть товар? Изменения не будут сохранены.")){
+                let self = this;
+                self.collapsedProducts.forEach(function(elem, key){
+                    if(elem.id_mp == id_mp){
+                        self.collapsedProducts.splice(key, 1);
+                    }
+                });
+            }
+        },
         openCollapse: function(id_mp)
         {
             let modalProduct = false;
