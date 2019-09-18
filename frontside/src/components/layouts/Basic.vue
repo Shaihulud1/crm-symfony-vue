@@ -55,6 +55,7 @@ import router from '../../router';
 import newprods from '../../views/Newprods';
 import productFormModal from "../../components/Product-edit-form.vue";
 import axiosXHR from "../../components/AxiosXHR.vue";
+import cookie from "../../components/Cookie";
 
 export default {
     name:"BasicLayout",
@@ -86,21 +87,15 @@ export default {
               }
           });
       });
-      // axiosXHR.methods.sendRequest('rest/inputs/'+"brand", function(response){
-      //     if(response.data == 'BAD_AUTH'){
-      //         router.push('login');
-      //     }else{
-      //         self.brandStorage.forEach(function(elem, key){
-      //             self.brandStorage.splice(key, 1);
-      //         });
-      //         if(response.data.length > 0)
-      //         {
-      //             response.data.forEach(function(elem){
-      //                 self.brandStorage.push(elem.name);
-      //             })
-      //         }
-      //     }
-      // });
+      let token = cookie.methods.getCookie("token");
+      axiosXHR.methods.sendRequest('rest/inputs/userdata/' + token, function(response){
+        if(response.data == 'BAD_AUTH'){
+            router.push('login');
+        }else{
+            self.userData.fullName = response.data.fullName;
+        }
+      });
+
     },
     methods:{
         closeProduct: function(id_mp)

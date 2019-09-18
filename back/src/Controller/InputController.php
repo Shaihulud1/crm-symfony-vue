@@ -4,12 +4,25 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/rest/inputs")
  */
 class InputController extends ApiController
 {
+    /**
+     * @Route("/userdata/{tokenUser}",  methods={"GET"})
+     */    
+    public function userdataAction($tokenUser, EntityManagerInterface $em)
+    {
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $tokenUser]);
+        return $this->respond([
+            'fullName' => $userData->getFullName(),
+        ]);
+    }
+
     /**
      * @Route("/brand",  methods={"GET"})
      */

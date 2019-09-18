@@ -18,7 +18,7 @@
                 <v-alert type="error" v-if="error">{{error}}</v-alert>
                 <v-card-actions>
                   <div class="flex-grow-1"></div>
-                  <v-btn color="blue white--text" @click="auth">Войти</v-btn>
+                  <v-btn color="blue white--text" @click="auth" :disabled="isDisabled">Войти</v-btn>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -42,9 +42,11 @@ export default {
     methods:{
         auth: function(e)
         {
+            this.isDisabled = true;
             this.error = false;
             if(!this.login || !this.pass){
                 this.error = "Не все поля заполненны";
+                this.isDisabled = false;
                 return;
             }
             let self = this;
@@ -60,12 +62,14 @@ export default {
                     cookie.methods.setCookie('token', response.data);
                     router.push({path: '/'});
                 }
+                self.isDisabled = false;
                 return; 
             }, 'post', data);
         },
     },
     data: () => {
         return {
+            isDisabled: false,
             error: false,
             login: "",
             pass: "",

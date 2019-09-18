@@ -24,7 +24,7 @@ class UserFixtures extends Fixture
         $user = new User;
         $user->setUsername('Admin');
         $user->setApitoken('apitoken');
-
+        $user->setFullname('Василий');
         $user->setPassword(md5(md5(md5("12345"))));
         // $user->setPassword($this->passwordEncoder->encodePassword(
         //     $user,

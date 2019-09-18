@@ -55,7 +55,6 @@
                     v-model="brand"
                     label="Бренд"
                     :items="brandSelect"
-
                     outlined
                     >
                   </v-select>
@@ -72,7 +71,6 @@
                     :rules="requiredSelectRules"
                     :items="sectionSelect"
                     label="Раздел"
-                    @change="changeSect"
                     outlined
                     required
                     >
@@ -82,7 +80,6 @@
                     :rules="requiredSelectRules"
                     :items="subSectionSelect"
                     label="Подраздел"
-                    @change="changeSubsect"
                     outlined
                     required
                     >
@@ -275,6 +272,91 @@ export default {
       uploadInputs: Boolean,
     },
     watch: {
+        section: function(e)
+        {
+          let self = this;
+          let tempSubsect = [];
+          e = (typeof e.value !== 'undefined') ? e.value : e;
+          if(typeof this.sectionStorage !== 'undefined')
+          {
+              this.sectionStorage.forEach(function(sect, indexSect){
+                  let chooseSect = true;
+                  if(sect.id != e){
+                    chooseSect = false;
+                  }
+                  sect.childs.forEach(function(child){
+                    tempSubsect.push({value:child.id, text:child.name, disabled:!chooseSect});
+                    if(self.subsection == child.id && !chooseSect)
+                    {
+                      self.subsection = '';
+                    }
+                  });
+              });
+              self.subSectionSelect = tempSubsect;
+          }
+          self.subSectionSelect = tempSubsect;
+        },
+        subsection: function(e)
+        {
+            let self = this;
+            if(typeof this.sectionStorage !== 'undefined')
+            {
+                this.sectionStorage.forEach(function(sect, indexSect){
+                  if(typeof sect.childs !== 'undefined'){
+                      sect.childs.forEach(function(child){
+                          if(e == child.id){
+                              self.section = {value: sect.id, text: sect.name};
+                          }
+                      });
+                  }
+                });
+            }
+        },
+        brand: function(e)
+        {
+            let self = this;
+            let tempGamma = [];
+            e = (typeof e.value !== 'undefined') ? e.value : e;
+            if(typeof this.brandStorage !== 'undefined')
+            {
+                this.brandStorage.forEach(function(brand, indexSect){
+                    let brandChoose = true;
+                    if(brand.id != e){
+                      brandChoose = false;
+                    }
+                    if(typeof brand.childs !== 'undefined')
+                    {
+                      brand.childs.forEach(function(child){
+                        tempGamma.push({value: child.id, text: child.name, disabled: !brandChoose});
+                        if(self.gammas.length > 0 && !brandChoose){
+                            self.gammas.forEach(function(gammaItem, index){
+                              if(gammaItem == child.id){
+                                self.gammas.splice(index, 1);
+                              }
+                            });
+                        }
+                      });
+                    }
+                });
+            }
+            self.gammaSelect = tempGamma;
+        },
+        gammas: function(e)
+        {
+            let self = this;
+            if(typeof this.brandStorage !== 'undefined')
+            {
+                this.brandStorage.forEach(function(brand, indexBrand){
+                  if(typeof brand.childs !== 'undefined'){
+                      brand.childs.forEach(function(child){
+                          if(e == child.id){
+                              self.brand = {value: brand.id, text: brand.name};
+                          }
+                      });
+                  }
+                });
+            }
+        },
         modalData: function(val)
         {
             this.id_mp = val.id_mp || "";
@@ -282,49 +364,6 @@ export default {
         }
     },
     methods: {
-      changeSubsect: function(e)
-      {
-          let self = this;
-          let tempSubsect = [];
-          if(typeof this.sectionStorage !== 'undefined')
-          {
-              this.sectionStorage.forEach(function(sect, indexSect){
-                 if(typeof sect.childs !== 'undefined'){
-                     let inSect = false;
-                     sect.childs.forEach(function(child){
-                         if(e == child.id){
-                             self.section = {value: sect.id, text: sect.name};
-                             inSect = true;
-                         }
-                     });
-                     self.sectionStorage[indexSect].childs.forEach(function(child, indexChild){
-                         tempSubsect.push({text:child.name, value:child.id, disabled: inSect ? false : true})
-                     });
-                 }
-              });
-          }
-          this.subSectionSelect = tempSubsect;
-      },
-      changeSect: function(e)
-      {
-          let self = this;
-          let tempSubsect = [];
-          if(typeof this.sectionStorage !== 'undefined')
-          {
-              this.sectionStorage.forEach(function(sect, indexSect){
-                  let inSect = e == sect.id ? false : true;
-                  sect.childs.forEach(function(child){
-                      let tempSect = {value:child.id, text:child.name};
-                      tempSect.disabled = inSect;
-                      tempSubsect.push(tempSect);
-                      if(self.subsection == child.id){
-                         console.log(self.subsection); 
-                      }
-                  });
-              });
-          }
-          self.subSectionSelect = tempSubsect;
-      },
       getSelect: function(select, getChild = false)
       {
           let result = [];
@@ -369,18 +408,35 @@ export default {
       }
     },
     computed: {
-      brandSelect: function(){
-        return this.getSelect(this.brandStorage);
+      brandSelect:{
+          set: function(val)
+          {
+              this.brandSelectData = val;
+          },
+          get: function(val)
+          {
+              if(typeof this.brandSelectData !== 'undefined' && this.brandSelectData.length < 1)
+              {
+                  this.brandSelectData = this.getSelect(this.brandStorage);
+              }
+              return this.brandSelectData;            
+          }
       },
-      gammaSelect: function(){
-          return this.getSelect(this.brandStorage, true);
+      gammaSelect:{
+          set: function(val)
+          {
+              this.gammaSelectData = val;
+          },
+          get: function(val)
+          {
+              if(typeof this.gammaSelectData !== 'undefined' && this.gammaSelectData.length < 1)
+              {
+                  this.gammaSelectData = this.getSelect(this.brandStorage, true);
+              }
+              return this.gammaSelectData;            
+          }
       },
-      // sectionSelect: function()
-      // {
-      //     return this.getSelect(this.sectionStorage);
-      // },
-      sectionSelect:
-      {
+      sectionSelect: {
           set: function(val)
           {
               this.sectionSelectData = val;
@@ -432,6 +488,8 @@ export default {
       return {
         sectionSelectData: [],
         subSectionSelectData: [],
+        brandSelectData: [],
+        gammaSelectData: [],
         selectData: false,
         isProductProcessed: true,
         /*form*/
