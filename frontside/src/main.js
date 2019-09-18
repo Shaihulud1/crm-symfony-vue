@@ -13,7 +13,11 @@ Vue.component('login', login);
 //global local storage plugin
 import persistentState from 'vue-persistent-state'
 const initialState = {
-   collapsedProducts: []
+   collapsedProducts: [],
+   brandStorage:[],
+   sectionStorage: [],
+   propStorage: [],
+   prodformStorage: [],
 };
 Vue.use(persistentState, initialState);
 

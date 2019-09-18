@@ -6,12 +6,12 @@ import cookie from '../components/Cookie';
 export default {
     name: "AxiosXHR",
     methods: {
-        sendRequest: function(rest, successFunc, method = 'get', data = false, domain = 'http://vita-crm.ru')
+        sendRequest: function(rest, successFunc, method = 'get', data = false, domain = 'http://127.2.2.2')
         {
             let token = cookie.methods.getCookie("token");
             let axiosConfig = {
                 method: method,
-                url: domain + '/' + rest + (rest == 'api/login' ? '' : '?auth=' + token), //'?auth=' + token,             
+                url: domain + '/' + rest + (rest == 'api/login' ? '' : '?auth=' + token), //'?auth=' + token,
             }
             if(!!data){
                 axiosConfig.data = data;

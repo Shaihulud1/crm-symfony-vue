@@ -37,7 +37,7 @@
         <v-content>
             <router-view ></router-view>
         </v-content>
-         <productFormModal v-model="productFormModalForm" :modalData="modalData" :uploadInputs=true></productFormModal>
+         <productFormModal v-model="productFormModalForm" :modalData="modalData"></productFormModal>
       </v-app>
 </template>
 
@@ -54,11 +54,53 @@
 import router from '../../router';
 import newprods from '../../views/Newprods';
 import productFormModal from "../../components/Product-edit-form.vue";
+import axiosXHR from "../../components/AxiosXHR.vue";
 
 export default {
     name:"BasicLayout",
     props: {
       source: String,
+    },
+    mounted: function()
+    {
+      var inputs = ["brand", "section", "prop", "prodform"],
+          self = this;
+      inputs.forEach(function(inputItem){
+          axiosXHR.methods.sendRequest('rest/inputs/'+ inputItem, function(response){
+              if(response.data == 'BAD_AUTH'){
+                  router.push('login');
+              }else{
+                  let storageItem = inputItem + 'Storage';
+                  console.log(storageItem)
+                  if(self[storageItem] != 'underfied' && self[storageItem].length > 0)
+                  {
+                      self[storageItem].forEach(function(e, i){
+                          self[storageItem].splice(i, 1);
+                      });
+                  }
+                  axiosXHR.methods.sendRequest('rest/inputs/' + inputItem, function(response){
+                      response.data.forEach(function(elem){
+                          self[storageItem].push(elem);
+                      });
+                  });
+              }
+          });
+      });
+      // axiosXHR.methods.sendRequest('rest/inputs/'+"brand", function(response){
+      //     if(response.data == 'BAD_AUTH'){
+      //         router.push('login');
+      //     }else{
+      //         self.brandStorage.forEach(function(elem, key){
+      //             self.brandStorage.splice(key, 1);
+      //         });
+      //         if(response.data.length > 0)
+      //         {
+      //             response.data.forEach(function(elem){
+      //                 self.brandStorage.push(elem.name);
+      //             })
+      //         }
+      //     }
+      // });
     },
     methods:{
         closeProduct: function(id_mp)

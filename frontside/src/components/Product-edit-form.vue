@@ -53,14 +53,14 @@
                   </v-text-field>
                   <v-select
                     v-model="brand"
-                    :items="['','La-roche', 'Brand 2']"
+                    :items="brandSelect"
                     label="Бренд"
                     outlined
                     >
                   </v-select>
                   <v-select
                     v-model="gammas"
-                    :items="['Gamma 1', 'Gamma 2']"
+                    :items="gammaSelect"
                     label="Гамма"
                     multiple
                     outlined
@@ -69,7 +69,7 @@
                   <v-select
                     v-model="section"
                     :rules="requiredSelectRules"
-                    :items="['Section 1', 'Section 2']"
+                    :items="sectionSelect"
                     label="Раздел"
                     outlined
                     required
@@ -78,7 +78,7 @@
                   <v-select
                     v-model="subsection"
                     :rules="requiredSelectRules"
-                    :items="['subsect 1', 'subsect 2']"
+                    :items="subSectionSelect"
                     label="Подраздел"
                     outlined
                     required
@@ -87,7 +87,7 @@
                   <v-select
                     v-model="formProd"
                     :rules="requiredSelectRules"
-                    :items="['Form 1', 'Form 2']"
+                    :items="prodformSelect"
                     label="Форма выпуска"
                     outlined
                     required
@@ -282,40 +282,26 @@ export default {
             this.name = val.name || "";
         }
     },
-    mounted: function()
-    {
-        if(!this.selectData && this.uploadInputs)
-        {
-            var inputs = ["brand", "section", "prop", "prodform"],
-                self = this,
-                token = cookie.methods.getCookie("token");
-
-            self.selectData = true;
-            inputs.forEach(function(action){
-                var self = this;
-                axiosXHR.methods.sendRequest('rest/inputs/'+action, function(response){
-                    if(response.data == 'BAD_AUTH'){
-                        router.push('login');
-                    }else{
-                        if(response.data.length > 0){
-                          response.data.forEach(function(elem){
-                            let itemsElem = action + 'Items';
-                            //console.log(self1);
-                            //self.itemsElem.push(elem.name);
-                          });
-                        }
-                        // brandItems: [],
-                        // sectionItems: [],
-                        // propItems: [],
-                        // prodItems: [],
-                        console.log(response);
-                    }
-                });
-            });
-
-        }
-    },
     methods: {
+      getSelect: function(select, getChild = false)
+      {
+          let result = [];
+          if(typeof select !== 'undefined' && select.length > 0){
+              select.forEach(function(val){
+                  if(!getChild)
+                  {
+                      result.push(val.name);
+                  }
+                  else if(typeof val.childs !== 'undefined' && val.childs.length > 0)
+                  {
+                      val.childs.forEach(function(childVal){
+                          result.push(childVal.name);
+                      });
+                  }
+              });
+          }
+          return result;
+      },
       collapseProduct: function()
       {
           this.show = false;
@@ -338,6 +324,26 @@ export default {
       }
     },
     computed: {
+      brandSelect: function(){
+        return this.getSelect(this.brandStorage);
+      },
+      gammaSelect: function(){
+          return this.getSelect(this.brandStorage, true);
+      },
+      sectionSelect: function()
+      {
+          return this.getSelect(this.sectionStorage);
+      },
+      subSectionSelect: function()
+      {
+          return this.getSelect(this.sectionStorage, true);
+      },
+      prodformSelect: function()
+      {
+          return this.getSelect(this.prodformStorage);
+      },
+      
+
       processStatus: function()
       {
         return this.isProductProcessed ? "Обработан" : "Не обработан";

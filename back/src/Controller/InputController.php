@@ -17,22 +17,22 @@ class InputController extends ApiController
     {
         return $this->respond([
             [
-                'id_mp' => 1,
-                'brand_name' => 'Brand 1',
-                'gammas' => [
+                'id' => 1,
+                'name' => 'Brand 1',
+                'childs' => [
                     [
                         'id' => 54,
-                        'gamma_name' => 'Gamma 1',
+                        'name' => 'Gamma 1',
                     ],
                     [
                         'id' => 55,
-                        'gamma_name' => 'Gamma 2',
+                        'name' => 'Gamma 2',
                     ],
                 ]
             ],
             [
-                'id_mp' => 2,
-                'brand_name' => 'Brand 2',
+                'id' => 2,
+                'name' => 'Brand 2',
             ],
         ]);
     }
@@ -46,7 +46,7 @@ class InputController extends ApiController
             [
                 'id' => 1,
                 'name' => 'Лекарства и БАДы',
-                'subsections' => [
+                'childs' => [
                     [
                         'id' => 12,
                         'name' => 'БАДы'
@@ -60,7 +60,7 @@ class InputController extends ApiController
             [
                 'id' => 2,
                 'name' => 'Медицинские приборы',
-                'subsections' => [
+                'childs' => [
                     [
                         'id' => 51,
                         'name' => 'Медицина'
@@ -81,12 +81,12 @@ class InputController extends ApiController
     {
         return $this->respond([
             [
-                'id_mp' => 1,
-                'prop' => 'Prop 1',
+                'id' => 1,
+                'name' => 'Prop 1',
             ],
             [
-                'id_mp' => 2,
-                'prop' => 'Prop 2',
+                'id' => 2,
+                'name' => 'Prop 2',
             ],
         ]);
     }
@@ -99,12 +99,12 @@ class InputController extends ApiController
     {
         return $this->respond([
             [
-                'id_mp' => 11312,
-                'prop' => 'ProdForm 1',
+                'id' => 11312,
+                'name' => 'ProdForm 1',
             ],
             [
-                'id_mp' => 1213,
-                'prop' => 'ProdForm 523',
+                'id' => 1213,
+                'name' => 'ProdForm 523',
             ],
         ]);
     }

@@ -11,6 +11,7 @@ const defaultLayout = "basic";
 import router from './router';
 
 import cookie from './components/Cookie';
+import axiosXHR from './components/AxiosXHR';
 
 router.beforeEach((to, from, next) => {
     let token = cookie.methods.getCookie("token");
