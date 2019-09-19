@@ -22,16 +22,20 @@ class UserController extends ApiController
         $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $tokenUser]);
         $result = [
             'fullName' => $userData->getFullName(),
+            'id' => $userData->getId(),
         ];
         $inWorks = $userData->getInWorks();
-
+        $curTime = time();
         foreach($inWorks as $work)
         {
+            if($work->getTimeWork() < $curTime){
+                continue;
+            }
             $result['in_work'][$work->getWorkType()][] = [
                 'time_work' => $work->getTimeWork(),
                 'id_mp' => $work->getObjID(),
                 //from oracle
-                'prod_name' => 'Нурофен',
+                'prod_name' => $work->getObjID() == 543 ? 'Ношпа' : 'Нурофен',
             ];
         }
         return $this->respond($result);

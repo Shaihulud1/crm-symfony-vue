@@ -89,4 +89,9 @@ class InWork
 
         return $this;
     }
+    
+    public function getNewTimeWork()
+    {
+        return time()  + 1800;
+    }
 }

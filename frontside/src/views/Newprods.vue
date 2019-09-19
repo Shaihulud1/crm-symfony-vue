@@ -79,28 +79,42 @@
       openModal: function(id_mp)
       {
           let self = this;
-          axiosXHR.methods.sendRequest('rest/product/' + id_mp, function(response){
+          let token = cookie.methods.getCookie("token");
+          axiosXHR.methods.sendRequest('rest/product/openproduct/' + id_mp+ '/'+ self.userData.id + '/' + token, function(response){
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
               }else{
-                  let modalProduct = false;
-                  if(self.collapsedProducts.length > 0)
-                  {
-                      self.collapsedProducts.forEach(function(elem){
-                          if(elem.id_mp == id_mp){
-                              modalProduct = elem;
-                          }
-                      });
+                  switch (response.data) {
+                    case 'BAD_PROD':
+                        alert('Такого товара не существует, обновите страницу');
+                        return;                      
+                    break;
+                    case 'IN_WORK':
+                        alert('Товар уже взят в работу другим пользователем');
+                        return;                      
+                    break;
+                  
+                    default:
+                        let modalProduct = false;
+                        if(self.collapsedProducts.length > 0)
+                        {
+                            self.collapsedProducts.forEach(function(elem){
+                                if(elem.id_mp == id_mp){
+                                    modalProduct = elem;
+                                }
+                            });
+                        }
+                        if(!modalProduct){
+                            modalProduct = response.data;
+                            self.collapsedProducts.push(modalProduct);
+                        }
+                        self.modalData = {
+                          id_mp: modalProduct.id_mp || "",
+                          name: modalProduct.prod_name || "",
+                        };
+                        self.productFormModalForm = true;
+                    break;
                   }
-                  if(!modalProduct){
-                      modalProduct = response.data;
-                      self.collapsedProducts.push(modalProduct);
-                  }
-                  self.modalData = {
-                     id_mp: modalProduct.id_mp || "",
-                     name: modalProduct.prod_name || "",
-                  };
-                  self.productFormModalForm = true;
               }
           });
       }

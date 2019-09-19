@@ -2,8 +2,9 @@
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class ApiController
+class ApiController extends AbstractController
 {
 
     /**

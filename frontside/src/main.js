@@ -18,7 +18,7 @@ const initialState = {
    sectionStorage: [],
    propStorage: [],
    prodformStorage: [],
-   userData: {fullName:''},
+   userData: {fullName:'', id: ''},
 };
 Vue.use(persistentState, initialState);
 

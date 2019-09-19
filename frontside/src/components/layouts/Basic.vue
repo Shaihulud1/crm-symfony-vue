@@ -11,10 +11,10 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-          <v-system-bar window class="collapsed-product" v-for="prod in collapsedProducts" v-bind:key="prod.id_mp">
-            <span @click="openCollapse(prod.id_mp)">{{ prod.prod_name | truncate(25, '...') }}</span>
+          <v-system-bar window class="collapsed-product" v-for="prod in collapsedProducts" v-bind:key="prod.id_mp" @click="openCollapse(prod.id_mp)">
+            <span>{{ prod.prod_name | truncate(25, '...') }}</span>
             <div class="flex-grow-1"></div>
-            <v-icon @click="openCollapse(prod.id_mp)">mdi-checkbox-blank-outline</v-icon>
+            <v-icon>mdi-checkbox-blank-outline</v-icon>
             <!-- <v-icon @click="closeProduct(prod.id_mp)">mdi-close</v-icon> -->
           </v-system-bar>
         </v-navigation-drawer>
@@ -88,38 +88,35 @@ export default {
           });
       });
       let token = cookie.methods.getCookie("token");
-      let ids = [];
-      self.collapsedProducts.map((el) => {
-         ids.push(el.id_mp);
-      });
       axiosXHR.methods.sendRequest('rest/user/bytoken/' + token, function(response){
         if(response.data == 'BAD_AUTH'){
             router.push('login');
         }else{
-            if(typeof response.data.in_work.NP != 'undefined')
+            let ids = [];
+            self.userData.fullName = response.data.fullName;
+            self.userData.id = response.data.id;
+            if(typeof response.data.in_work != 'undefined' && typeof response.data.in_work.NP != 'undefined')
             {
+                response.data.in_work.NP.map((el) => {
+                  ids.push(el.id_mp);
+                });
                 response.data.in_work.NP.forEach(function(elem, index){
+                    let isset = false;
                     self.collapsedProducts.forEach(function(collapseElem){
-                        if(elem.id_mp == collapseElem.id_mp)
-                        {
-                            response.data.in_work.NP[index] = collapseElem;
+                        if(elem.id_mp == collapseElem.id_mp){
+                            isset = true;
                         }
                     });
+                    if(!isset){
+                        self.collapsedProducts.push(elem);
+                    }
                 });
-                // self.collapsedProducts.forEach(function(collapseElem){
-                //
-                // });
             }
-            // if(ids.length > 0)
-            // {
-            //     self.collapsedProducts.forEach(function(elemDel, index){
-            //         ids.forEach(function(id){
-            //             if(elemDel.id_mp == id){
-            //                 self.collapsedProducts.splice(index, 1);
-            //             }
-            //         });
-            //     });
-            // }
+            self.collapsedProducts.forEach(function(collapseElem, index){
+                if(!ids.includes(collapseElem.id_mp)){
+                   self.collapsedProducts.splice(index, 1);
+                }
+            });
         }
       });
 
@@ -138,17 +135,46 @@ export default {
         },
         openCollapse: function(id_mp)
         {
-            let modalProduct = false;
-            this.collapsedProducts.forEach(function(elem){
-                if(elem.id_mp == id_mp){
-                    modalProduct = elem;
+            let self = this;
+            let token = cookie.methods.getCookie("token");
+            axiosXHR.methods.sendRequest('rest/product/openproduct/' + id_mp + '/'+ self.userData.id + '/' + token, function(response){
+                if(response.data == 'BAD_AUTH'){
+                    router.push('login');
+                }else{
+                    switch (response.data) {
+                        case 'BAD_PROD':
+                            alert('Такого товара не существует, обновите страницу');
+                            return;                      
+                        break;
+                        case 'IN_WORK':
+                            alert('Товар уже взят в работу другим пользователем, обновите страницу');
+                            return;                      
+                        break;   
+                        default:
+                            let modalProduct = false;
+                            if(self.collapsedProducts.length > 0)
+                            {
+                                self.collapsedProducts.forEach(function(elem){
+                                    if(elem.id_mp == id_mp){
+                                        modalProduct = elem;
+                                    }
+                                });
+                            }
+                            if(!modalProduct){
+                                modalProduct = response.data;
+                                self.collapsedProducts.push(modalProduct);
+                            }
+                            self.modalData = {
+                              id_mp: modalProduct.id_mp || "",
+                              name: modalProduct.prod_name || "",
+                            };
+                            self.productFormModalForm = true;
+                        break;                                 
+                        
+                    }
+                
                 }
             });
-            this.modalData = {
-               id_mp: modalProduct.id_mp || "",
-               name: modalProduct.prod_name || "",
-            };
-            this.productFormModalForm = true;
         },
         reloadTable: function(e)
         {

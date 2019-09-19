@@ -473,14 +473,25 @@ export default {
       },
       closeProduct: function()
       {
-          if(confirm("Вы уверены, что хотите закрыть товар? Изменения не будут сохранены.")){
+        
+        if(confirm("Вы уверены, что хотите закрыть товар? Изменения не будут сохранены.")){
+              let token = cookie.methods.getCookie("token");
               let self = this;
-              self.collapsedProducts.forEach(function(elem, key){
-                  if(elem.id_mp == self.id_mp){
-                      self.collapsedProducts.splice(key, 1);
-                  }
-              });
-              this.show = false;
+              axiosXHR.methods.sendRequest('rest/product/closeproduct/' + self.id_mp + '/'+ self.userData.id + '/' + token, 
+                function(response){
+                    if(response.data == 'BAD_AUTH'){
+                        router.push('login');
+                    }else{  
+                        self.collapsedProducts.forEach(function(elem, key){
+                            if(elem.id_mp == self.id_mp){
+                                self.collapsedProducts.splice(key, 1);
+                            }
+                        });
+                        self.show = false;                      
+                    }
+                }
+              );
+
           }
       },
       saveProduct: function()
