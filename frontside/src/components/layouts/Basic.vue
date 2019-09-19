@@ -88,11 +88,38 @@ export default {
           });
       });
       let token = cookie.methods.getCookie("token");
-      axiosXHR.methods.sendRequest('rest/inputs/userdata/' + token, function(response){
+      let ids = [];
+      self.collapsedProducts.map((el) => {
+         ids.push(el.id_mp);
+      });
+      axiosXHR.methods.sendRequest('rest/user/bytoken/' + token, function(response){
         if(response.data == 'BAD_AUTH'){
             router.push('login');
         }else{
-            self.userData.fullName = response.data.fullName;
+            if(typeof response.data.in_work.NP != 'undefined')
+            {
+                response.data.in_work.NP.forEach(function(elem, index){
+                    self.collapsedProducts.forEach(function(collapseElem){
+                        if(elem.id_mp == collapseElem.id_mp)
+                        {
+                            response.data.in_work.NP[index] = collapseElem;
+                        }
+                    });
+                });
+                // self.collapsedProducts.forEach(function(collapseElem){
+                //
+                // });
+            }
+            // if(ids.length > 0)
+            // {
+            //     self.collapsedProducts.forEach(function(elemDel, index){
+            //         ids.forEach(function(id){
+            //             if(elemDel.id_mp == id){
+            //                 self.collapsedProducts.splice(index, 1);
+            //             }
+            //         });
+            //     });
+            // }
         }
       });
 

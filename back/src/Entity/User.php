@@ -184,7 +184,6 @@ class User implements UserInterface
                 $inWork->setUser(null);
             }
         }
-
         return $this;
     }
 
