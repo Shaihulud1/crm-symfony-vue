@@ -14,7 +14,7 @@ class InputController extends ApiController
 {
     /**
      * @Route("/userdata/{tokenUser}",  methods={"GET"})
-     */    
+     */
     public function userdataAction($tokenUser, EntityManagerInterface $em)
     {
         $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $tokenUser]);
@@ -64,10 +64,6 @@ class InputController extends ApiController
                         'id' => 12,
                         'name' => 'БАДы'
                     ],
-                    [
-                        'id' => 11,
-                        'name' => 'Лекарства'
-                    ],
                 ]
             ],
             [
@@ -78,30 +74,41 @@ class InputController extends ApiController
                         'id' => 51,
                         'name' => 'Медицина'
                     ],
-                    [
-                        'id' => 71,
-                        'name' => 'Приборы'
-                    ],
+
                 ]
             ],
         ]);
     }
 
     /**
-     * @Route("/prop",  methods={"GET"})
+     * @Route("/prop/{subsecID}",  methods={"GET"})
      */
-    public function propAction()
+    public function propAction($subsecID)
     {
-        return $this->respond([
-            [
-                'id' => 1,
-                'name' => 'Prop 1',
-            ],
-            [
-                'id' => 2,
-                'name' => 'Prop 2',
-            ],
-        ]);
+        if($subsecID == 12){
+            return $this->respond([
+                [
+                    'id' => 1,
+                    'name' => 'Prop 1',
+                    'group' => 'Group 3',
+                    'subsection' => 'subsect 12',
+                    'isActive' => 'Да',
+                ],
+            ]);
+        }
+        elseif($subsecID == 51)
+        {
+            return $this->respond([
+                [
+                    'id' => 2,
+                    'name' => 'Prop 2',
+                    'group' => 'Group 3',
+                    'subsection' => 'subsect 51',
+                    'isActive' => 'Да',
+                ],
+            ]);
+        }
+
     }
 
 

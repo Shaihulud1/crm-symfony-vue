@@ -7,7 +7,7 @@ import router from '../router';
 export default {
     name: "AxiosXHR",
     methods: {
-        sendRequest: function(rest, successFunc, method = 'get', data = false, domain = 'http://vita-crm.ru')
+        sendRequest: function(rest, successFunc, method = 'get', data = false, domain = 'http://127.2.2.2')
         {
             let token = cookie.methods.getCookie("token");
             let axiosConfig = {

@@ -64,7 +64,7 @@ export default {
     },
     mounted: function()
     {
-      var inputs = ["brand", "section", "prop", "prodform"],
+      var inputs = ["brand", "section", "prodform"],
           self = this;
       inputs.forEach(function(inputItem){
           axiosXHR.methods.sendRequest('rest/inputs/'+ inputItem, function(response){

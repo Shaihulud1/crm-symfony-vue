@@ -39,7 +39,6 @@
             <v-icon left>mdi-card-text-outline</v-icon>
             Описание
           </v-tab>
-
           <v-tab-item>
             <v-card flat>
               <v-card-text>
@@ -99,6 +98,60 @@
                     readonly
                   >
                   </v-text-field>
+                  <p class="text-left">Свойства:  </p><v-btn small color="success" @click="propsAddPopup"  :disabled="isSectionSelect">Добавить свойство</v-btn>
+                  <v-data-table
+                      :headers="propHeaders"
+                      :items="propItems"
+                      hide-default-footer
+                      class="elevation-1"
+                    >
+                    <template v-slot:body="{ items }">
+                      <tbody>
+                        <tr v-for="(item, index) in items" :key="index"  class="product-table-item" @dblclick="openModal(item.id_mp)">
+                          <td>{{ item.id }}</td>
+                          <td>{{ item.name }}</td>
+                          <td>{{ item.group }}</td>
+                          <td>{{ item.subsection }}</td>
+                          <td>
+                              <!-- {{ item.isActive }} -->
+                              <v-select
+                                v-model="item.isActive"
+                                :rules="requiredSelectRules"
+                                :items="['Да', 'Нет']"
+                                required
+                                >
+                              </v-select>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </template>
+                  </v-data-table>
+                  <v-dialog v-model="propsAdd">
+                      <v-card>
+                            <v-card-title class="headline">Свойства</v-card-title>
+
+                            <v-card-text>
+                              <v-text-field
+                                 v-model="searchProp"
+                                 append-icon="search"
+                                 label="Поиск"
+                                 single-line
+                                 hide-details
+                               ></v-text-field>
+                            </v-card-text>
+                            <v-data-table
+                                v-model="propItems"
+                                :headers="propHeaders"
+                                :items="propsAll"
+                                :search="searchProp"
+                                item-key="id"
+                                show-select
+                                class="elevation-1"
+                                hide-default-footer
+                              >
+                            </v-data-table>
+                      </v-card>
+                    </v-dialog>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -311,6 +364,8 @@ export default {
                   }
                 });
             }
+            self.isSectionSelect = !self.subsection;
+            self.propItems = [];
         },
         brand: function(e)
         {
@@ -364,6 +419,32 @@ export default {
         }
     },
     methods: {
+      propsAddPopup: function()
+      {
+          let self = this;
+          if(!self.subsection){
+              return;
+          }
+          self.isSectionSelect = true;
+          self.propsAll = [];
+          axiosXHR.methods.sendRequest('rest/inputs/prop/' + self.subsection, function(response){
+              if(response.data == 'BAD_AUTH'){
+                  router.push('login');
+              }else if(typeof response.data !== 'undefined'){
+                  response.data.forEach(function(elem){
+                      self.propsAll.push({id: elem.id, name: elem.name, group: elem.group, subsection: elem.subsection, isActive: 'Да'});
+                  });
+              }
+              self.isSectionSelect = false;
+              self.propsAdd = true;
+          });
+          //     if(response.data == 'BAD_AUTH'){
+          //         router.push('login');
+          //     }else{
+          //         self.newProdsList = response.data;
+          //     }
+          // });
+      },
       getSelect: function(select, getChild = false)
       {
           let result = [];
@@ -408,6 +489,16 @@ export default {
       }
     },
     computed: {
+      isSectionSelect:{
+          set: function(val)
+          {
+              this.disabledPropBtn = val;
+          },
+          get: function()
+          {
+              return this.disabledPropBtn;
+          }
+      },
       brandSelect:{
           set: function(val)
           {
@@ -419,7 +510,7 @@ export default {
               {
                   this.brandSelectData = this.getSelect(this.brandStorage);
               }
-              return this.brandSelectData;            
+              return this.brandSelectData;
           }
       },
       gammaSelect:{
@@ -433,7 +524,7 @@ export default {
               {
                   this.gammaSelectData = this.getSelect(this.brandStorage, true);
               }
-              return this.gammaSelectData;            
+              return this.gammaSelectData;
           }
       },
       sectionSelect: {
@@ -486,6 +577,17 @@ export default {
     },
     data: () => {
       return {
+        propHeaders: [
+            { text: 'ID', value: 'id' },
+            { text: 'Название', value: 'name' },
+            { text: 'Группа свойства', value: 'group' },
+            { text: 'Подраздел', value: 'subsection' },
+            { text: 'Активность', value: 'isActive' },
+        ],
+        propsAll: [],
+        disabledPropBtn: true,
+        searchProp: "",
+        propsAdd: false,
         sectionSelectData: [],
         subSectionSelectData: [],
         brandSelectData: [],
