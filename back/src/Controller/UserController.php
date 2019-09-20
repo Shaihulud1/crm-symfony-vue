@@ -14,6 +14,38 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class UserController extends ApiController
 {
+
+    /**
+     * @Route("/session/{userID}/{token}",  methods={"GET"})
+     */
+    public function sessionAction($userID, $token)
+    {
+         $em = $this->getDoctrine()->getManager();
+         $user = $em->getRepository(User::class)->findOneBy(['id' => $userID, 'apitoken' => $token]);
+         if(!$user){
+            return $this->respond('BAD_AUTH');
+         }
+         $qb = $em->createQueryBuilder();
+         $inWorks = $qb->select('i')
+             ->from(InWork::class, 'i')
+             ->where(
+                 $qb->expr()->gt('i.timeWork', time())
+             )
+             ->andWhere('i.user = :userObj')
+             ->setParameter('userObj', $user)
+             ->getQuery()
+             ->getResult();
+         if($inWorks){
+             foreach($inWorks as $inWork)
+             {
+                $inWork->setTimeWork($inWork->getNewTimeWork());
+                $em->merge($inWork);
+             }
+             $em->flush();
+         }
+         return $this->respond('DONE');
+    }
+
     /**
      * @Route("/bytoken/{tokenUser}",  methods={"GET"})
      */

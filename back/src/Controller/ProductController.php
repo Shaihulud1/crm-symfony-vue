@@ -25,15 +25,11 @@ class ProductController extends ApiController
             ->where(
                 $qb->expr()->gt('i.timeWork', time())
             )
-            // ->andWhere(
-            //     $qb->expr()->in('i.objID', ':ids')
-            // )
-            // ->setParameter('ids', [242, 543])
             ->getQuery()
             ->getResult();
         $inWorkIDs = [];
         foreach($inWorks as $inWork)
-        { 
+        {
             $inWorkIDs[] = $inWork->getObjID();
         }
         return $this->respond([
@@ -83,12 +79,12 @@ class ProductController extends ApiController
         $em = $this->getDoctrine()->getManager();
         $existProd = [242, 543];
         if(!in_array($id, $existProd)){
-            return $this->respond('BAD_PROD'); 
+            return $this->respond('BAD_PROD');
         }
-        
+
         $user = $em->getRepository(User::class)->findOneBy(['id' => $userID, 'apitoken' => $token]);
         if(!$user){
-            return $this->respond('BAD_AUTH'); 
+            return $this->respond('BAD_AUTH');
         }
 
         $qb = $em->createQueryBuilder();
@@ -108,7 +104,7 @@ class ProductController extends ApiController
             $userWork = $inWork->getUser();
             if($userID != $userWork->getID())
             {
-                return $this->respond('IN_WORK');                
+                return $this->respond('IN_WORK');
             }else{
                 $returnProd = true;
             }
@@ -149,10 +145,10 @@ class ProductController extends ApiController
     public function closeProductAction($id, $userID, $token)
     {
         $em = $this->getDoctrine()->getManager();
-        
+
         $user = $em->getRepository(User::class)->findOneBy(['id' => $userID, 'apitoken' => $token]);
         if(!$user){
-            return $this->respond('BAD_AUTH'); 
+            return $this->respond('BAD_AUTH');
         }
         $arInWork = $user->getInWorks();
         foreach($arInWork as $inWork)
