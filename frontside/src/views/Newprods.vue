@@ -1,6 +1,9 @@
 <template>
     <v-card>
       <v-card-title>
+        <v-btn tile outlined @click="reloadTable" :disabled="isDisable">
+          <v-icon left>mdi-reload</v-icon>Обновить таблицу <span class="reload-timer" v-if="isDisable">({{disableReloadTimer}})</span>
+        </v-btn>
         <div class="flex-grow-1"></div>
         <v-text-field
           v-model="search"
@@ -59,6 +62,16 @@
         });
     },
     computed: {
+        isDisable:{
+            set: function(val)
+            {
+                this.disableReloadTimer = val;
+            },
+            get: function()
+            {
+                return this.disableReloadTimer > 0 ? true : false;
+            }
+        },
         newProdsList:{
             get: function()
             {
@@ -76,6 +89,29 @@
         axiosXHR
     },
     methods: {
+      countDown: function() {
+        let self = this;
+        if (this.disableReloadTimer > 0) {
+          return setTimeout(() => {
+            let currTime = self.disableReloadTimer -= 1;
+            self.isDisable = currTime;
+            self.countDown();
+          }, 1000);
+        }
+      },
+      reloadTable: function()
+      {
+          let self = this;
+          axiosXHR.methods.sendRequest('rest/product', function(response){
+              if(response.data == 'BAD_AUTH'){
+                  router.push('login');
+              }else{
+                  self.newProdsList = response.data;
+              }
+              self.isDisable = 30;
+              self.countDown();
+          });
+      },
       openModal: function(id_mp)
       {
           let self = this;
@@ -87,13 +123,13 @@
                   switch (response.data) {
                     case 'BAD_PROD':
                         alert('Такого товара не существует, обновите страницу');
-                        return;                      
+                        return;
                     break;
                     case 'IN_WORK':
                         alert('Товар уже взят в работу другим пользователем');
-                        return;                      
+                        return;
                     break;
-                  
+
                     default:
                         let modalProduct = false;
                         if(self.collapsedProducts.length > 0)

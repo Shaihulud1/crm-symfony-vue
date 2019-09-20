@@ -25,13 +25,7 @@
               {{pageLabel}}
           </v-toolbar-title>
           <div class="flex-grow-1"></div>
-          <v-btn tile outlined color="white" @click="reloadTable">
-            <v-icon left>mdi-reload</v-icon>Обновить таблицу
-          </v-btn>
-          <!-- <v-btn icon text>
-            <v-icon>mdi-reload</v-icon>
-            <v-text>Обновить страницу</v-text>
-          </v-btn> -->
+          <h3>{{userData.fullName}}</h3>
         </v-app-bar>
 
         <v-content>
@@ -144,12 +138,12 @@ export default {
                     switch (response.data) {
                         case 'BAD_PROD':
                             alert('Такого товара не существует, обновите страницу');
-                            return;                      
+                            return;
                         break;
                         case 'IN_WORK':
                             alert('Товар уже взят в работу другим пользователем, обновите страницу');
-                            return;                      
-                        break;   
+                            return;
+                        break;
                         default:
                             let modalProduct = false;
                             if(self.collapsedProducts.length > 0)
@@ -169,18 +163,13 @@ export default {
                               name: modalProduct.prod_name || "",
                             };
                             self.productFormModalForm = true;
-                        break;                                 
-                        
+                        break;
+
                     }
-                
+
                 }
             });
         },
-        reloadTable: function(e)
-        {
-
-            //this.$router.go();
-        }
     },
     computed:{
       pageLabel: function()
