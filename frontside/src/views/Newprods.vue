@@ -2,7 +2,7 @@
     <v-card>
       <v-card-title>
         <v-btn tile outlined @click="reloadTable" :disabled="isDisable">
-          <v-icon left>mdi-reload</v-icon>Обновить таблицу <span class="reload-timer" v-if="isDisable">({{disableReloadTimer}})</span>
+          <v-icon left>mdi-reload</v-icon>Обновить таблицу <span class="reload-timer" v-if="isDisable">({{timers.disableReloadTimer}})</span>
         </v-btn>
         <div class="flex-grow-1"></div>
         <v-text-field
@@ -17,7 +17,7 @@
           :headers="headers"
           :items="newProdsList"
           :search="search"
-          hide-default-footer
+
         >
         <template v-slot:body="{ items }">
           <tbody>
@@ -53,6 +53,7 @@
     mounted: function()
     {
         let self = this;
+        self.countDown();
         axiosXHR.methods.sendRequest('rest/product', function(response){
             if(response.data == 'BAD_AUTH'){
                 router.push('login');
@@ -65,11 +66,11 @@
         isDisable:{
             set: function(val)
             {
-                this.disableReloadTimer = val;
+                this.timers.disableReloadTimer = val;
             },
             get: function()
             {
-                return this.disableReloadTimer > 0 ? true : false;
+                return this.timers.disableReloadTimer > 0 ? true : false;
             }
         },
         newProdsList:{
@@ -91,9 +92,9 @@
     methods: {
       countDown: function() {
         let self = this;
-        if (this.disableReloadTimer > 0) {
+        if (this.timers.disableReloadTimer > 0) {
           return setTimeout(() => {
-            let currTime = self.disableReloadTimer -= 1;
+            let currTime = self.timers.disableReloadTimer -= 1;
             self.isDisable = currTime;
             self.countDown();
           }, 1000);
@@ -108,7 +109,7 @@
               }else{
                   self.newProdsList = response.data;
               }
-              self.isDisable = 30;
+              self.isDisable = 15;
               self.countDown();
           });
       },

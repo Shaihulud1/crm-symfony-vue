@@ -66,7 +66,6 @@ export default {
                   router.push('login');
               }else{
                   let storageItem = inputItem + 'Storage';
-                  console.log(storageItem)
                   if(self[storageItem] != 'underfied' && self[storageItem].length > 0)
                   {
                       self[storageItem].forEach(function(e, i){
@@ -106,16 +105,42 @@ export default {
                     }
                 });
             }
-            self.collapsedProducts.forEach(function(collapseElem, index){
-                if(!ids.includes(collapseElem.id_mp)){
-                   self.collapsedProducts.splice(index, 1);
-                }
-            });
+
+            if(ids.length == 0)
+            {
+               for (var i = self.collapsedProducts.length; i > 0; i--) {
+                   self.collapsedProducts.pop();
+               }
+            }else{
+                self.collapsedProducts.forEach(function(collapseElem, index, object){
+                    if(!ids.includes(collapseElem.id_mp)){
+                        object.splice(index, 1);
+                    }
+                });
+            }
+            setTimeout(() => {
+                self.userSession()
+            }, 1000);
         }
       });
 
     },
     methods:{
+        userSession: function()
+        {
+            let token = cookie.methods.getCookie("token");
+            let userID = this.userData.id;
+            let self = this;
+            axiosXHR.methods.sendRequest('rest/user/session/' + userID + '/'+ token, function(response){
+                if(response.data == 'BAD_AUTH'){
+                    router.push('login');
+                }else{
+                    setTimeout(() => {
+                        self.userSession()
+                    }, 30000);
+                }
+            });
+        },
         closeProduct: function(id_mp)
         {
             if(confirm("Вы уверены, что хотите закрыть товар? Изменения не будут сохранены.")){

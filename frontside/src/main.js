@@ -19,7 +19,7 @@ const initialState = {
    propStorage: [],
    prodformStorage: [],
    userData: {fullName:'', id: ''},
-   disableReloadTimer: 0,
+   timers: {disableReloadTimer: 0},
 };
 Vue.use(persistentState, initialState);
 
