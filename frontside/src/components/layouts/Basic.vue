@@ -31,7 +31,8 @@
         <v-content>
             <router-view ></router-view>
         </v-content>
-         <productFormModal v-model="productFormModalForm" :modalData="modalData"></productFormModal>
+        <productFormModal v-model="productFormModalForm" :modalData="modalData"></productFormModal>
+        <loader></loader>
       </v-app>
 </template>
 
@@ -50,6 +51,7 @@ import newprods from '../../views/Newprods';
 import productFormModal from "../../components/Product-edit-form.vue";
 import axiosXHR from "../../components/AxiosXHR.vue";
 import cookie from "../../components/Cookie";
+import loader from '../../components/Loader';
 
 export default {
     name:"BasicLayout",
@@ -58,71 +60,56 @@ export default {
     },
     mounted: function()
     {
-      var inputs = ["brand", "section", "prodform"],
-          self = this;
-      inputs.forEach(function(inputItem){
-          axiosXHR.methods.sendRequest('rest/inputs/'+ inputItem, function(response){
-              if(response.data == 'BAD_AUTH'){
-                  router.push('login');
-              }else{
-                  let storageItem = inputItem + 'Storage';
-                  if(self[storageItem] != 'underfied' && self[storageItem].length > 0)
-                  {
-                      self[storageItem].forEach(function(e, i){
-                          self[storageItem].splice(i, 1);
-                      });
-                  }
-                  axiosXHR.methods.sendRequest('rest/inputs/' + inputItem, function(response){
-                      response.data.forEach(function(elem){
-                          self[storageItem].push(elem);
-                      });
-                  });
-              }
-          });
-      });
-      let token = cookie.methods.getCookie("token");
-      axiosXHR.methods.sendRequest('rest/user/bytoken/' + token, function(response){
-        if(response.data == 'BAD_AUTH'){
-            router.push('login');
-        }else{
-            let ids = [];
-            self.userData.fullName = response.data.fullName;
-            self.userData.id = response.data.id;
-            if(typeof response.data.in_work != 'undefined' && typeof response.data.in_work.NP != 'undefined')
-            {
-                response.data.in_work.NP.map((el) => {
-                  ids.push(el.id_mp);
-                });
-                response.data.in_work.NP.forEach(function(elem, index){
-                    let isset = false;
-                    self.collapsedProducts.forEach(function(collapseElem){
-                        if(elem.id_mp == collapseElem.id_mp){
-                            isset = true;
+        this.$store.dispatch('fetchBrands');
+        this.$store.dispatch('fetchSections');
+        this.$store.dispatch('fetchProdForms');
+
+
+        var inputs = ["prodform"],
+            self = this;
+        let token = cookie.methods.getCookie("token");
+        axiosXHR.methods.sendRequest('rest/user/bytoken/' + token, function(response){
+            if(response.data == 'BAD_AUTH'){
+                router.push('login');
+            }else{
+                let ids = [];
+                self.userData.fullName = response.data.fullName;
+                self.userData.id = response.data.id;
+                if(typeof response.data.in_work != 'undefined' && typeof response.data.in_work.NP != 'undefined')
+                {
+                    response.data.in_work.NP.map((el) => {
+                    ids.push(el.id_mp);
+                    });
+                    response.data.in_work.NP.forEach(function(elem, index){
+                        let isset = false;
+                        self.collapsedProducts.forEach(function(collapseElem){
+                            if(elem.id_mp == collapseElem.id_mp){
+                                isset = true;
+                            }
+                        });
+                        if(!isset){
+                            self.collapsedProducts.push(elem);
                         }
                     });
-                    if(!isset){
-                        self.collapsedProducts.push(elem);
-                    }
-                });
-            }
+                }
 
-            if(ids.length == 0)
-            {
-               for (var i = self.collapsedProducts.length; i > 0; i--) {
-                   self.collapsedProducts.pop();
-               }
-            }else{
-                self.collapsedProducts.forEach(function(collapseElem, index, object){
-                    if(!ids.includes(collapseElem.id_mp)){
-                        object.splice(index, 1);
-                    }
-                });
+                if(ids.length == 0)
+                {
+                for (var i = self.collapsedProducts.length; i > 0; i--) {
+                    self.collapsedProducts.pop();
+                }
+                }else{
+                    self.collapsedProducts.forEach(function(collapseElem, index, object){
+                        if(!ids.includes(collapseElem.id_mp)){
+                            object.splice(index, 1);
+                        }
+                    });
+                }
+                setTimeout(() => {
+                    self.userSession()
+                }, 1000);
             }
-            setTimeout(() => {
-                self.userSession()
-            }, 1000);
-        }
-      });
+        });
 
     },
     methods:{
@@ -156,7 +143,9 @@ export default {
         {
             let self = this;
             let token = cookie.methods.getCookie("token");
+            self.$store.commit('updateLoad', true);
             axiosXHR.methods.sendRequest('rest/product/openproduct/' + id_mp + '/'+ self.userData.id + '/' + token, function(response){
+                self.$store.commit('updateLoad', false);
                 if(response.data == 'BAD_AUTH'){
                     router.push('login');
                 }else{
@@ -203,7 +192,8 @@ export default {
       },
     },
     components:{
-        productFormModal
+        productFormModal,
+        loader
     },
     data: () => ({
         modalData: {},

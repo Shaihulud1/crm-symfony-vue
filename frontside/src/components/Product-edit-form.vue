@@ -15,7 +15,7 @@
 
         <v-card-title class="headline">
           ID: {{ id_mp }} <br>
-          Название из Вита-системы: {{ nameDisplay }}
+          Название из Вита-системы: 
         </v-card-title>
         <v-card-text>
           <v-switch v-model="isProductProcessed" v-bind:label="processStatus" color="success" hide-details disabled></v-switch>
@@ -317,6 +317,9 @@ import axios from 'axios';
 import cookie from '../components/Cookie';
 import axiosXHR from '../components/AxiosXHR';
 
+
+import {mapGetters} from 'vuex';
+
 export default {
     name: "PopupProductEditor",
     props:{
@@ -329,11 +332,12 @@ export default {
         {
           let self = this;
           let tempSubsect = [];
+          let sectionStorage = this.$store.getters.sectionSelect;
           let isConfirmChanges = {choose: true, mess: false};
           e = (typeof e.value !== 'undefined') ? e.value : e;
-          if(typeof this.sectionStorage !== 'undefined')
+          if(typeof sectionStorage !== 'undefined')
           {
-              this.sectionStorage.forEach(function(sect, indexSect){
+              sectionStorage.forEach(function(sect, indexSect){
                   let chooseSect = true;
                   if(sect.id != e){
                     chooseSect = false;
@@ -371,9 +375,10 @@ export default {
         subsection: function(e)
         {
             let self = this;
-            if(typeof this.sectionStorage !== 'undefined')
+            let sectionStorage = this.$store.getters.sectionSelect;
+            if(typeof sectionStorage !== 'undefined')
             {
-                this.sectionStorage.forEach(function(sect, indexSect){
+                sectionStorage.forEach(function(sect, indexSect){
                   if(typeof sect.childs !== 'undefined'){
                       sect.childs.forEach(function(child){
                           if(e == child.id){
@@ -389,13 +394,14 @@ export default {
         brand: function(e, oldE)
         {
             let self = this;
+            let brandStorage = this.$store.getters.brandSelect;
             let tempGamma = [];
             let isConfirmChanges = {choose: true, mess: false};
             e = (typeof e.value !== 'undefined') ? e.value : e;
             //oldE = (typeof oldE.value !== 'undefined') ? oldE.value : oldE;
-            if(typeof this.brandStorage !== 'undefined')
+            if(typeof brandStorage !== 'undefined')
             {
-                this.brandStorage.forEach(function(brand, indexSect){
+                brandStorage.forEach(function(brand, indexSect){
                     let brandChoose = true;
                     if(brand.id != e){
                       brandChoose = false;
@@ -428,7 +434,6 @@ export default {
                 });
             }
             if(!isConfirmChanges.choose){
-
                 self.brand = {text:oldE.text, value: oldE.value};
                 return;
             }else{
@@ -438,9 +443,10 @@ export default {
         gammas: function(e)
         {
             let self = this;
-            if(typeof this.brandStorage !== 'undefined')
+            let brandStorage = this.$store.getters.brandSelect;
+            if(typeof brandStorage !== 'undefined')
             {
-                this.brandStorage.forEach(function(brand, indexBrand){
+                brandStorage.forEach(function(brand, indexBrand){
                   if(typeof brand.childs !== 'undefined'){
                       brand.childs.forEach(function(child){
                           if(e == child.id){
@@ -467,7 +473,9 @@ export default {
           }
           self.isSectionSelect = true;
           self.propsAll = [];
+          self.$store.commit('updateLoad', true);
           axiosXHR.methods.sendRequest('rest/inputs/prop/' + self.subsection, function(response){
+              self.$store.commit('updateLoad', false);
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
               }else if(typeof response.data !== 'undefined'){
@@ -478,12 +486,6 @@ export default {
               self.isSectionSelect = false;
               self.propsAdd = true;
           });
-          //     if(response.data == 'BAD_AUTH'){
-          //         router.push('login');
-          //     }else{
-          //         self.newProdsList = response.data;
-          //     }
-          // });
       },
       getSelect: function(select, getChild = false)
       {
@@ -517,8 +519,10 @@ export default {
         if(confirm("Вы уверены, что хотите закрыть товар? Изменения не будут сохранены.")){
               let token = cookie.methods.getCookie("token");
               let self = this;
+              self.$store.commit('updateLoad', true);
               axiosXHR.methods.sendRequest('rest/product/closeproduct/' + self.id_mp + '/'+ self.userData.id + '/' + token, 
                 function(response){
+                    self.$store.commit('updateLoad', false);
                     if(response.data == 'BAD_AUTH'){
                         router.push('login');
                     }else{  
@@ -550,6 +554,7 @@ export default {
               return this.disabledPropBtn;
           }
       },
+      
       brandSelect:{
           set: function(val)
           {
@@ -557,10 +562,7 @@ export default {
           },
           get: function(val)
           {
-              if(typeof this.brandSelectData !== 'undefined' && this.brandSelectData.length < 1)
-              {
-                  this.brandSelectData = this.getSelect(this.brandStorage);
-              }
+              this.brandSelectData = this.getSelect(this.$store.getters.brandSelect);
               return this.brandSelectData;
           }
       },
@@ -571,10 +573,7 @@ export default {
           },
           get: function(val)
           {
-              if(typeof this.gammaSelectData !== 'undefined' && this.gammaSelectData.length < 1)
-              {
-                  this.gammaSelectData = this.getSelect(this.brandStorage, true);
-              }
+              this.gammaSelectData = this.getSelect(this.$store.getters.brandSelect, true);
               return this.gammaSelectData;
           }
       },
@@ -585,10 +584,7 @@ export default {
           },
           get: function()
           {
-              if(typeof this.sectionSelectData !== 'undefined' && this.sectionSelectData.length < 1)
-              {
-                  this.sectionSelectData = this.getSelect(this.sectionStorage);
-              }
+              this.sectionSelectData = this.getSelect(this.$store.getters.sectionSelect);
               return this.sectionSelectData;
           }
       },
@@ -599,17 +595,14 @@ export default {
           },
           get: function()
           {
-              if(typeof this.subSectionSelectData !== 'undefined' && this.subSectionSelectData.length < 1)
-              {
-                  this.subSectionSelectData = this.getSelect(this.sectionStorage, true);
-              }
+              this.subSectionSelectData = this.getSelect(this.$store.getters.sectionSelect, true);
               return this.subSectionSelectData;
           }
 
       },
       prodformSelect: function()
       {
-          return this.getSelect(this.prodformStorage);
+          return this.getSelect(this.$store.getters.prodFormSelect);
       },
 
 

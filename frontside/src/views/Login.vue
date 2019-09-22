@@ -53,6 +53,7 @@ export default {
             let data = new FormData();
             data.append('username', this.login);
             data.append('password', this.pass);
+            this.$store.commit('updateLoad', true);
             axiosXHR.methods.sendRequest('api/login', function(response){
                 if(response.data.errors == 'BAD_AUTH')
                 {
@@ -62,6 +63,7 @@ export default {
                     cookie.methods.setCookie('token', response.data);
                     router.push({path: '/'});
                 }
+                self.$store.commit('updateLoad', false);
                 self.isDisabled = false;
                 return; 
             }, 'post', data);

@@ -54,7 +54,9 @@
     {
         let self = this;
         self.countDown();
+        self.$store.commit('updateLoad', true);
         axiosXHR.methods.sendRequest('rest/product', function(response){
+            self.$store.commit('updateLoad', false);
             if(response.data == 'BAD_AUTH'){
                 router.push('login');
             }else{
@@ -103,13 +105,15 @@
       reloadTable: function()
       {
           let self = this;
+          self.$store.commit('updateLoad', true);
           axiosXHR.methods.sendRequest('rest/product', function(response){
+              self.$store.commit('updateLoad', false);
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
               }else{
                   self.newProdsList = response.data;
               }
-              self.isDisable = 15;
+              self.isDisable = 30;
               self.countDown();
           });
       },
@@ -117,7 +121,9 @@
       {
           let self = this;
           let token = cookie.methods.getCookie("token");
+          self.$store.commit('updateLoad', true);
           axiosXHR.methods.sendRequest('rest/product/openproduct/' + id_mp+ '/'+ self.userData.id + '/' + token, function(response){
+              self.$store.commit('updateLoad', false);
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
               }else{

@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import vuetify from './plugins/vuetify';
-
-import basic from "./components/layouts/Basic.vue";
-import login from "./components/layouts/Login.vue";
+import vuetify from './plugins/vuetify'
+import store from './vuex/store'
+import basic from "./components/layouts/Basic.vue"
+import login from "./components/layouts/Login.vue"
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 Vue.component('basic', basic);
@@ -14,10 +14,6 @@ Vue.component('login', login);
 import persistentState from 'vue-persistent-state'
 const initialState = {
    collapsedProducts: [],
-   brandStorage:[],
-   sectionStorage: [],
-   propStorage: [],
-   prodformStorage: [],
    userData: {fullName:'', id: ''},
    timers: {disableReloadTimer: 0},
 };
@@ -37,6 +33,7 @@ Vue.filter('truncate', filter);
 Vue.config.productionTip = false
 
 new Vue({
+  store,
   router,
   vuetify,
   render: h => h(App)

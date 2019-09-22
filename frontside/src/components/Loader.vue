@@ -1,17 +1,6 @@
 <template>
-  <div class="text-center">
-    <v-btn
-      :disabled="dialog"
-      :loading="dialog"
-      class="white--text"
-      color="purple darken-2"
-      @click="dialog = true"
-    >
-      Start loading
-    </v-btn>
     <v-dialog
-      v-model="dialog"
-      hide-overlay
+      v-model="isLoad"
       persistent
       width="300"
     >
@@ -20,7 +9,7 @@
         dark
       >
         <v-card-text>
-          Please stand by
+          Идет загрузка...подождите
           <v-progress-linear
             indeterminate
             color="white"
@@ -29,5 +18,21 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-  </div>
 </template>
+
+<script>
+export default {
+  mounted: function()
+  {
+      this.$store.dispatch('loadMountFalse');
+  },
+  computed:{
+      isLoad: function()
+      {
+          return this.$store.getters.isLoadStatus;
+      }
+  }
+}
+</script>
+
+

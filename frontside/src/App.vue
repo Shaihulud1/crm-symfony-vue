@@ -1,7 +1,7 @@
 <template>
-  <component :is="layout">
+    <component :is="layout">
 
-  </component>
+    </component>
 </template>
 
 <script>
@@ -26,6 +26,7 @@ export default {
       return (this.$route.meta.layout || defaultLayout)
     }
   },
+  components:{},
   name: 'App',
 
   data: () => ({
