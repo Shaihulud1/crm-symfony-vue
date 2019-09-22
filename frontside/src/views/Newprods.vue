@@ -145,8 +145,10 @@
                             modalProduct = response.data;
                             self.collapsedProducts.push(modalProduct);
                         }
+                        modalProduct.nameDisplay = response.data.prod_name;
                         self.modalData = {
-                          id_mp: modalProduct.id_mp || "",
+                          id_mp: id_mp || "",
+                          nameDisplay: modalProduct.prod_name || "",
                           name: modalProduct.prod_name || "",
                         };
                         self.productFormModalForm = true;

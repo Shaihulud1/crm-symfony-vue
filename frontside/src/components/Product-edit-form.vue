@@ -15,7 +15,7 @@
 
         <v-card-title class="headline">
           ID: {{ id_mp }} <br>
-          Название из Вита-системы: {{ name }}
+          Название из Вита-системы: {{ nameDisplay }}
         </v-card-title>
         <v-card-text>
           <v-switch v-model="isProductProcessed" v-bind:label="processStatus" color="success" hide-details disabled></v-switch>
@@ -325,10 +325,11 @@ export default {
       uploadInputs: Boolean,
     },
     watch: {
-        section: function(e)
+        section: function(e, oldE)
         {
           let self = this;
           let tempSubsect = [];
+          let isConfirmChanges = {choose: true, mess: false};
           e = (typeof e.value !== 'undefined') ? e.value : e;
           if(typeof this.sectionStorage !== 'undefined')
           {
@@ -341,13 +342,31 @@ export default {
                     tempSubsect.push({value:child.id, text:child.name, disabled:!chooseSect});
                     if(self.subsection == child.id && !chooseSect)
                     {
-                      self.subsection = '';
+                        if(!isConfirmChanges.mess)
+                        {
+                            isConfirmChanges.mess = true;
+                            if(!confirm('Вы уверены, что хотите изменить Раздел? Поле Подраздел будет очищено, прикрепленные Свойства будут удалены.'))
+                            {
+                                isConfirmChanges.choose = false;
+                            }
+                        }
+                        if(isConfirmChanges.choose)
+                        {
+                            self.subsection = '';
+                        }
                     }
                   });
               });
+              if(isConfirmChanges.choose)
+              {
+                  self.subSectionSelect = tempSubsect;
+              }
+          }
+          if(!isConfirmChanges.choose){
+              self.section = {text:oldE.text, value: oldE.value};
+          }else{
               self.subSectionSelect = tempSubsect;
           }
-          self.subSectionSelect = tempSubsect;
         },
         subsection: function(e)
         {
@@ -367,11 +386,13 @@ export default {
             self.isSectionSelect = !self.subsection;
             self.propItems = [];
         },
-        brand: function(e)
+        brand: function(e, oldE)
         {
             let self = this;
             let tempGamma = [];
+            let isConfirmChanges = {choose: true, mess: false};
             e = (typeof e.value !== 'undefined') ? e.value : e;
+            //oldE = (typeof oldE.value !== 'undefined') ? oldE.value : oldE;
             if(typeof this.brandStorage !== 'undefined')
             {
                 this.brandStorage.forEach(function(brand, indexSect){
@@ -386,7 +407,19 @@ export default {
                         if(self.gammas.length > 0 && !brandChoose){
                             self.gammas.forEach(function(gammaItem, index){
                               if(gammaItem == child.id){
-                                self.gammas.splice(index, 1);
+                                  if(!isConfirmChanges.mess)
+                                  {
+                                      isConfirmChanges.mess = true;
+                                      if(!confirm('Вы уверены, что хотите изменить Бренд? Поле Гамма будет очищено.'))
+                                      {
+                                          isConfirmChanges.choose = false;
+                                      }
+                                  }
+                                  if(isConfirmChanges.choose)
+                                  {
+                                    self.gammas.splice(index, 1);
+
+                                  }
                               }
                             });
                         }
@@ -394,7 +427,13 @@ export default {
                     }
                 });
             }
-            self.gammaSelect = tempGamma;
+            if(!isConfirmChanges.choose){
+
+                self.brand = {text:oldE.text, value: oldE.value};
+                return;
+            }else{
+              self.gammaSelect = tempGamma;
+            }
         },
         gammas: function(e)
         {
@@ -415,6 +454,7 @@ export default {
         modalData: function(val)
         {
             this.id_mp = val.id_mp || "";
+            this.nameDisplay = val.nameDisplay || "";
             this.name = val.name || "";
         }
     },
