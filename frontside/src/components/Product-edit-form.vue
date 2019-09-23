@@ -45,6 +45,7 @@
                   <v-text-field
                     v-model="name"
                     :rules="nameRules"
+                    class="prod-name-input"
                     outlined
                     label="Наименование"
                     required
@@ -107,7 +108,7 @@
                     >
                     <template v-slot:body="{ items }">
                       <tbody>
-                        <tr v-for="(item, index) in items" :key="index"  class="product-table-item" @dblclick="openModal(item.id_mp)">
+                        <tr v-for="(item, index) in items" :key="index"  class="product-table-item">
                           <td>{{ item.id }}</td>
                           <td>{{ item.name }}</td>
                           <td>{{ item.group }}</td>
@@ -218,6 +219,59 @@
                   >
                   </v-text-field>
                   <v-switch v-model="isRecipeNeeded" label="Товар по рецепту" color="success"></v-switch>
+
+                  <p class="text-left">Активное вещество:  </p><v-btn small color="success" @click="mnnAddPopup">Добавить активное вещество</v-btn>
+                  <v-data-table
+                      :headers="mnnHeaders"
+                      :items="mnnItems" 
+                      hide-default-footer
+                      class="elevation-1"
+                    >
+                    <template v-slot:body="{ items }">
+                      <tbody>
+                        <tr v-for="(item, index) in items" :key="index"  class="product-table-item">
+                          <td>{{ item.id }}</td>
+                          <td>{{ item.name }}</td>
+                          <td>
+                              <!-- {{ item.isActive }} -->
+                              <v-select
+                                v-model="item.isActive"
+                                :rules="requiredSelectRules"
+                                :items="['Да', 'Нет']"
+                                required
+                                >
+                              </v-select>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </template>
+                  </v-data-table>
+                  <v-dialog v-model="mnnAdd">
+                      <v-card>
+                            <v-card-title class="headline">Mnn</v-card-title>
+
+                            <v-card-text>
+                              <v-text-field
+                                 v-model="searchMnn"
+                                 append-icon="search"
+                                 label="Поиск"
+                                 single-line
+                                 hide-details
+                               ></v-text-field>
+                            </v-card-text>
+                            <v-data-table
+                                v-model="mnnItems"
+                                :headers="mnnHeaders"
+                                :items="mnnAll"
+                                :search="searchMnn"
+                                item-key="id"
+                                show-select
+                                class="elevation-1"
+                                hide-default-footer
+                              >
+                            </v-data-table>
+                      </v-card>
+                    </v-dialog>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -328,6 +382,14 @@ export default {
       uploadInputs: Boolean,
     },
     watch: {
+        name: function(e)
+        {
+          this.name = this.toUpperCaseFirstLetter(e);
+        },
+        box: function(e)
+        {
+            this.box = this.toUpperCaseFirstLetter(e);
+        },
         section: function(e, oldE)
         {
           let self = this;
@@ -465,6 +527,10 @@ export default {
         }
     },
     methods: {
+      toUpperCaseFirstLetter: function(string)
+      {
+          return string.charAt(0).toUpperCase() + string.slice(1);
+      },
       propsAddPopup: function()
       {
           let self = this;
@@ -485,6 +551,23 @@ export default {
               }
               self.isSectionSelect = false;
               self.propsAdd = true;
+          });
+      },
+      mnnAddPopup: function()
+      {
+          let self = this;
+          self.mnnAll = [];
+          self.$store.commit('updateLoad', true);
+          axiosXHR.methods.sendRequest('rest/inputs/mnn', function(response){
+              self.$store.commit('updateLoad', false);
+              if(response.data == 'BAD_AUTH'){
+                  router.push('login');
+              }else if(typeof response.data !== 'undefined'){
+                  response.data.forEach(function(elem){
+                      self.mnnAll.push({id: elem.id, name: elem.name, isActive: 'Да'});
+                  });
+              }
+              self.mnnAdd = true;
           });
       },
       getSelect: function(select, getChild = false)
@@ -621,6 +704,11 @@ export default {
     },
     data: () => {
       return {
+        mnnHeaders: [
+            { text: 'ID', value: 'id' },
+            { text: 'Название', value: 'name' },
+            { text: 'Активность', value: 'isActive' },
+        ],
         propHeaders: [
             { text: 'ID', value: 'id' },
             { text: 'Название', value: 'name' },
@@ -629,9 +717,12 @@ export default {
             { text: 'Активность', value: 'isActive' },
         ],
         propsAll: [],
+        mnnAll: [],
         disabledPropBtn: true,
         searchProp: "",
         propsAdd: false,
+        searchMnn: "",
+        mnnAdd: false,
         sectionSelectData: [],
         subSectionSelectData: [],
         brandSelectData: [],
@@ -678,6 +769,7 @@ export default {
             latinName: "",
             rusName: "",
             isRecipeNeeded: false,
+            mnnItems: [],
            /**/
            /*tab3*/
             detail: "",
@@ -697,4 +789,5 @@ export default {
   .prod-popup-btn{
     margin-right: 15px;
   }
+
 </style>

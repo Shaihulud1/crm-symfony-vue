@@ -98,6 +98,25 @@ class InputController extends ApiController
 
     }
 
+    /**
+     * @Route("/mnn",  methods={"GET"})
+     */
+    public function mnnAction()
+    {
+        return $this->respond([
+            [
+                'id' => 1,
+                'name' => 'Mnn1',
+                'isActive' => 'Да',
+            ],
+            [
+                'id' => 2,
+                'name' => 'Mnn2',
+                'isActive' => 'Да',
+            ],
+        ]);
+    }
+
 
     /**
      * @Route("/prodform",  methods={"GET"})
