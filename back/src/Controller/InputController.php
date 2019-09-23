@@ -66,31 +66,16 @@ class InputController extends ApiController
     /**
      * @Route("/prop/{subsecID}",  methods={"GET"})
      */
-    public function propAction($subsecID)
+    public function propAction($subsecID, EntityManagerInterface $em, Request $request)
     {
-        if($subsecID == 12){
-            return $this->respond([
-                [
-                    'id' => 1,
-                    'name' => 'Prop 1',
-                    'group' => 'Group 3',
-                    'subsection' => 'subsect 12',
-                    'isActive' => 'Да',
-                ],
-            ]);
-        }
-        elseif($subsecID == 51)
-        {
-            return $this->respond([
-                [
-                    'id' => 2,
-                    'name' => 'Prop 2',
-                    'group' => 'Group 3',
-                    'subsection' => 'subsect 51',
-                    'isActive' => 'Да',
-                ],
-            ]);
-        }
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $subsectGroups = $oracleDB->getPropsWithGroups((int)$subsecID);
+        return $this->respond(!empty($subsectGroups) ? $subsectGroups : "EMPTY_DATA");
+
 
     }
 
@@ -117,17 +102,14 @@ class InputController extends ApiController
     /**
      * @Route("/prodform",  methods={"GET"})
      */
-    public function prodformAction()
+    public function prodformAction(EntityManagerInterface $em, Request $request)
     {
-        return $this->respond([
-            [
-                'id' => 11312,
-                'name' => 'ProdForm 1',
-            ],
-            [
-                'id' => 1213,
-                'name' => 'ProdForm 523',
-            ],
-        ]);
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $forms = $oracleDB->getForms();
+        return $this->respond($forms);
     }
 }

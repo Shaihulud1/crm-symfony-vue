@@ -13,7 +13,7 @@ class OracleDB
     private $userID;
     private $userName;
     
-    public function __construct($userID, $userName)
+    public function __construct(?Int $userID, ?String $userName)
     {
         $this->oracle = \oci_connect(self::ORNAME, self::ORPASS, self::ORCONN, self::ORCHST);
         $this->userID = $userID;
@@ -21,7 +21,7 @@ class OracleDB
         $this->authUser();
     }
 
-    public function authUser()
+    public function authUser(): void
     {
         $sql = "BEGIN set_cont_man_user(:p_id_user, :p_user_name, null); END;";
         $sti = oci_parse($this->oracle, $sql);
@@ -30,7 +30,7 @@ class OracleDB
         oci_execute($sti);
     }
 
-    public function getGammas()
+    public function getGammas(): array
     {
         $sql = "SELECT ID_GAMMA, GAMMA_NAME, ID_BR  FROM v_gamma ORDER BY GAMMA_NAME ASC";
         $sti = oci_parse($this->oracle, $sql);
@@ -46,7 +46,7 @@ class OracleDB
         return $res;
     }
 
-    public function getBrands()
+    public function getBrands(): array
     {
         $sql = "SELECT ID_BR, BRAND_NAME FROM v_brand ORDER BY BRAND_NAME ASC";
         $sti = oci_parse($this->oracle, $sql);
@@ -61,7 +61,7 @@ class OracleDB
         return $res;
     }
 
-    public function getSubSections()
+    public function getSubSections(): array
     {
         $sql = "SELECT ID_SUBSEC, ID_SECTION, SUBSEC_NAME FROM v_subsection ORDER BY SUBSEC_NAME ASC";
         $sti = oci_parse($this->oracle, $sql);
@@ -77,7 +77,7 @@ class OracleDB
         return $res;
     }
 
-    public function getSections()
+    public function getSections(): array
     {
         $sql = "SELECT ID_SECTION, SECTION_NAME FROM v_sections ORDER BY SECTION_NAME ASC";
         $sti = oci_parse($this->oracle, $sql);
@@ -92,10 +92,45 @@ class OracleDB
         return $res;
     }
 
+    public function getForms(): array
+    {
+        $sql = "SELECT FORM_NAME, ID_FORM, FORM_SH_NAME FROM v_form ORDER BY FORM_NAME ASC";
+        $sti = oci_parse($this->oracle, $sql);
+        oci_execute($sti);
+        $res = [];
+        while ($result = oci_fetch_assoc($sti)) {
+            $res[] = [
+                'id' => $result['ID_FORM'],
+                'name' => $result['FORM_NAME'],
+                'shortName' => $result['FORM_SH_NAME'],
+            ];   
+        }
+        return $res;
+    }
+
+    public function getPropsWithGroups(?Int $subsectID): Array
+    {
+        $sql = "SELECT ID_PROP, PROP_NAME, GRPR_NAME, ID_GRPR, ID_SUBSEC FROM v_subsec_group where id_subsec = $subsectID";
+        $sti = oci_parse($this->oracle, $sql); 
+        oci_execute($sti);       
+        $res = [];
+        while ($result = oci_fetch_assoc($sti)) {
+            $res[] = [
+                'id' => $result['ID_PROP'],
+                'name' => $result['PROP_NAME'],
+                'group' => $result['GRPR_NAME'],
+                'groupID' => $result['ID_GRPR'],
+                'subsection' => $result['ID_SUBSEC'],
+                'isActive' => 'Да',
+            ];
+        } 
+        return $res;  
+    }
+
 
     public function test()
     {   
-        $sql = "SELECT * FROM SUBSECTION";
+        $sql = "SELECT * FROM v_subsec_group";
         $sti = oci_parse($this->oracle, $sql);
         oci_execute($sti);
         $res = [];

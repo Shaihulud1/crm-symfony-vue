@@ -380,6 +380,19 @@ export default {
       uploadInputs: Boolean,
     },
     watch: {
+        formProd: function(e)
+        {
+            let formsSelect = this.$store.getters.prodFormSelect;
+            if(formsSelect != 'undefined' && formsSelect.length > 0)
+            {
+                for (var i = 0, len = formsSelect.length; i < len; i++) {
+                    if(e == formsSelect[i].id){
+                        this.formProdShort = formsSelect[i].shortName;
+                        return;
+                    }
+                }
+            }
+        },
         name: function(e)
         {
           this.name = this.toUpperCaseFirstLetter(e);
@@ -402,24 +415,27 @@ export default {
                   if(sect.id != e){
                     chooseSect = false;
                   }
-                  sect.childs.forEach(function(child){
-                    tempSubsect.push({value:child.id, text:child.name, disabled:!chooseSect});
-                    if(self.subsection == child.id && !chooseSect)
-                    {
-                        if(!isConfirmChanges.mess)
+                  if(typeof sect.childs !== 'undefined')
+                  {
+                      sect.childs.forEach(function(child){
+                        tempSubsect.push({value:child.id, text:child.name, disabled:!chooseSect});
+                        if(self.subsection == child.id && !chooseSect)
                         {
-                            isConfirmChanges.mess = true;
-                            if(!confirm('Вы уверены, что хотите изменить Раздел? Поле Подраздел будет очищено, прикрепленные Свойства будут удалены.'))
+                            if(!isConfirmChanges.mess)
                             {
-                                isConfirmChanges.choose = false;
+                                isConfirmChanges.mess = true;
+                                if(!confirm('Вы уверены, что хотите изменить Раздел? Поле Подраздел будет очищено, прикрепленные Свойства будут удалены.'))
+                                {
+                                    isConfirmChanges.choose = false;
+                                }
+                            }
+                            if(isConfirmChanges.choose)
+                            {
+                                self.subsection = [];
                             }
                         }
-                        if(isConfirmChanges.choose)
-                        {
-                            self.subsection = '';
-                        }
-                    }
-                  });
+                      });
+                  }
               });
               if(isConfirmChanges.choose)
               {
@@ -540,7 +556,14 @@ export default {
               self.$store.commit('updateLoad', false);
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
-              }else if(typeof response.data !== 'undefined'){
+              }
+              else if(response.data == 'EMPTY_DATA')
+              {
+                  alert('У выбранного подраздела нет доступных свойств');
+                  self.isSectionSelect = false;
+                  return;
+              }
+              else if(typeof response.data !== 'undefined'){
                   response.data.forEach(function(elem){
                       self.propsAll.push({id: elem.id, name: elem.name, group: elem.group, subsection: elem.subsection, isActive: 'Да'});
                   });
