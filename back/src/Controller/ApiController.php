@@ -3,6 +3,8 @@ namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ApiController extends AbstractController
 {
@@ -81,5 +83,15 @@ class ApiController extends AbstractController
             }
         }
         return $response;
+    }
+
+    protected function getUserData(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        //request = new Request;
+        print_r($request->request->get("auth"));
+        die();
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        return $token;
     }
 }

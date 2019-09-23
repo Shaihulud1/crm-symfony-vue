@@ -4,6 +4,11 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Service\OracleDB;
+use App\Entity\User;
+
 
 /**
  * @Route("/rest/inputs")
@@ -13,58 +18,49 @@ class InputController extends ApiController
     /**
      * @Route("/brand",  methods={"GET"})
      */
-    public function brandAction()
+    public function brandAction(EntityManagerInterface $em, Request $request)
     {
-        return $this->respond([
-            [
-                'id' => 1,
-                'name' => 'Brand 1',
-                'childs' => [
-                    [
-                        'id' => 54,
-                        'name' => 'Gamma 1',
-                    ],
-                    [
-                        'id' => 55,
-                        'name' => 'Gamma 2',
-                    ],
-                ]
-            ],
-            [
-                'id' => 2,
-                'name' => 'Brand 2',
-            ],
-        ]);
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+        
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $brands = $oracleDB->getBrands();
+        $gammas = $oracleDB->getGammas();
+        foreach($gammas as $gamma)
+        {
+            if(!empty($brands[$gamma['idBrand']]))
+            {
+                $brands[$gamma['idBrand']]['childs'][] = $gamma;
+            }
+
+        }
+        $brands = array_values($brands);
+        return $this->respond($brands);
     }
 
     /**
      * @Route("/section",  methods={"GET"})
      */
-    public function sectionAction()
+    public function sectionAction(EntityManagerInterface $em, Request $request)
     {
-        return $this->respond([
-            [
-                'id' => 1,
-                'name' => 'Лекарства и БАДы',
-                'childs' => [
-                    [
-                        'id' => 12,
-                        'name' => 'БАДы'
-                    ],
-                ]
-            ],
-            [
-                'id' => 2,
-                'name' => 'Медицинские приборы',
-                'childs' => [
-                    [
-                        'id' => 51,
-                        'name' => 'Медицина'
-                    ],
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
 
-                ]
-            ],
-        ]);
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $sections = $oracleDB->getSections();
+        $subSections = $oracleDB->getSubSections();
+        foreach($subSections as $subSect)
+        {
+            if(!empty($sections[$subSect['idSect']]))
+            {
+                $sections[$subSect['idSect']]['childs'][] = $subSect;
+            }
+
+        }
+        $sections = array_values($sections);
+        return $this->respond($sections);
     }
 
     /**

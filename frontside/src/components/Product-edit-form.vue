@@ -62,7 +62,6 @@
                     v-model="gammas"
                     :items="gammaSelect"
                     label="Гамма"
-                    multiple
                     outlined
                     >
                   </v-select>
@@ -96,7 +95,7 @@
                   <v-text-field
                     v-model="formProdShort"
                     outlined
-                    readonly
+                    label="Форма выпуска, короткое название"
                   >
                   </v-text-field>
                   <p class="text-left">Свойства:  </p><v-btn small color="success" @click="propsAddPopup"  :disabled="isSectionSelect">Добавить свойство</v-btn>
@@ -174,13 +173,12 @@
                     label="Производитель"
                   >
                   </v-text-field>
-                  <v-select
+                  <v-text-field
                     v-model="formProd2"
-                    :items="['Form 1', 'Form 2']"
-                    label="Форма выпуска"
                     outlined
-                    >
-                  </v-select>
+                    label="Производитель"
+                  >
+                  </v-text-field>
                   <v-text-field
                     v-model="dosage"
                     :rules="dosageRules"
@@ -472,24 +470,22 @@ export default {
                     {
                       brand.childs.forEach(function(child){
                         tempGamma.push({value: child.id, text: child.name, disabled: !brandChoose});
-                        if(self.gammas.length > 0 && !brandChoose){
-                            self.gammas.forEach(function(gammaItem, index){
-                              if(gammaItem == child.id){
-                                  if(!isConfirmChanges.mess)
-                                  {
-                                      isConfirmChanges.mess = true;
-                                      if(!confirm('Вы уверены, что хотите изменить Бренд? Поле Гамма будет очищено.'))
-                                      {
-                                          isConfirmChanges.choose = false;
-                                      }
-                                  }
-                                  if(isConfirmChanges.choose)
-                                  {
-                                    self.gammas.splice(index, 1);
+                        if(self.gammas && !brandChoose){
+                            if(self.gammas == child.id){
+                                if(!isConfirmChanges.mess)
+                                {
+                                    isConfirmChanges.mess = true;
+                                    if(!confirm('Вы уверены, что хотите изменить Бренд? Поле Гамма будет очищено.'))
+                                    {
+                                        isConfirmChanges.choose = false;
+                                    }
+                                }
+                                if(isConfirmChanges.choose)
+                                {
+                                  self.gammas = [];
 
-                                  }
-                              }
-                            });
+                                }
+                            }
                         }
                       });
                     }
@@ -656,7 +652,9 @@ export default {
           },
           get: function(val)
           {
-              this.gammaSelectData = this.getSelect(this.$store.getters.brandSelect, true);
+              if(this.gammaSelectData.length == 0){
+                  this.gammaSelectData = this.getSelect(this.$store.getters.brandSelect, true);
+              }
               return this.gammaSelectData;
           }
       },
@@ -678,7 +676,9 @@ export default {
           },
           get: function()
           {
-              this.subSectionSelectData = this.getSelect(this.$store.getters.sectionSelect, true);
+              if(this.subSectionSelectData.length == 0){
+                  this.subSectionSelectData = this.getSelect(this.$store.getters.sectionSelect, true);
+              }
               return this.subSectionSelectData;
           }
 
