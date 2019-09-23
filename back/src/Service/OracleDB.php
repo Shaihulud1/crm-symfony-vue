@@ -4,10 +4,7 @@ namespace App\Service;
 
 class OracleDB
 {
-    const ORNAME = "ouip_dev";
-    const ORPASS = "T8y5ferY";
-    const ORCONN = "91.194.16.45:21522/ORC2";
-    const ORCHST = "AL32UTF8";
+
 
     private $oracle;
     private $userID;
