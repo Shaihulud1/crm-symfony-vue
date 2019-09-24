@@ -144,7 +144,7 @@ export default {
             let self = this;
             let token = cookie.methods.getCookie("token");
             self.$store.commit('updateLoad', true);
-            axiosXHR.methods.sendRequest('rest/product/openproduct/' + id_mp + '/'+ self.userData.id + '/' + token, function(response){
+            axiosXHR.methods.sendRequest('rest/new-product/openproduct/' + id_mp + '/'+ self.userData.id + '/' + token, function(response){
                 self.$store.commit('updateLoad', false);
                 if(response.data == 'BAD_AUTH'){
                     router.push('login');

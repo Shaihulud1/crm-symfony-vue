@@ -4,8 +4,8 @@ namespace App\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\User;
 use App\Entity\InWork;
-use Doctrine\ORM\EntityManagerInterface;
-
+use Symfony\Component\HttpFoundation\Request;
+use App\Service\OracleDB;
 
 /**
  * @Route("/rest")
@@ -13,11 +13,16 @@ use Doctrine\ORM\EntityManagerInterface;
 class ProductController extends ApiController
 {
     /**
-    * @Route("/product",  methods={"GET"})
+    * @Route("/new-product",  methods={"GET"})
     */
-    public function productAction()
+    public function newProductAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+
         $qb = $em->createQueryBuilder();
 
         $inWorks = $qb->select('i')
@@ -32,53 +37,27 @@ class ProductController extends ApiController
         {
             $inWorkIDs[] = $inWork->getObjID();
         }
-        return $this->respond([
-            [
-                'id_mp' => 242,
-                'prod_name' => 'Нурофен',
-                'in_work' => in_array(242, $inWorkIDs) ? 1 : 0,
-                'date_insert' => "19.08.2019",
-            ],
-            [
-                'id_mp' => 543,
-                'prod_name' => 'Ношпа',
-                'in_work' => in_array(543, $inWorkIDs) ? 1 : 0,
-                'date_insert' => "19.08.2019",
-            ],
-        ]);
+
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $newProds = $oracleDB->getNewProdsList($inWorkIDs);
+
+        return $this->respond($newProds);
     }
 
     /**
-    * @Route("/product/{id}",  methods={"GET"})
+    * @Route("/new-product/openproduct/{id}/{userID}/{token}",  methods={"GET"})
     */
-    public function singleproductAction($id)
-    {
-        if($id == '242')
-        {
-            return $this->respond([
-                'id_mp' => 242,
-                'prod_name' => 'Нурофен',
-                'in_work' => 1,
-                'date_insert' => "19.08.2019",
-            ]);
-        }else{
-            return $this->respond([
-                'id_mp' => 543,
-                'prod_name' => 'Ношпа',
-                'in_work' => 1,
-                'date_insert' => "19.08.2019",
-            ]);
-        }
-    }
-
-    /**
-    * @Route("/product/openproduct/{id}/{userID}/{token}",  methods={"GET"})
-    */
-    public function openProductAction($id, $userID, $token)
+    public function openNewProductByID($id, $userID, $token, Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $existProd = [242, 543];
-        if(!in_array($id, $existProd)){
+
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $newProd = $oracleDB->getNewProdByID($id);
+        if(empty($newProd)){
             return $this->respond('BAD_PROD');
         }
 
@@ -119,25 +98,35 @@ class ProductController extends ApiController
             $returnProd = true;
         }
         if($returnProd){
-            if($id == '242')
-            {
-                return $this->respond([
-                    'id_mp' => 242,
-                    'prod_name' => 'Нурофен',
-                    'in_work' => 1,
-                    'date_insert' => "19.08.2019",
-                ]);
-            }else{
-                return $this->respond([
-                    'id_mp' => 543,
-                    'prod_name' => 'Ношпа',
-                    'in_work' => 1,
-                    'date_insert' => "19.08.2019",
-                ]);
-            }
+            return $this->respond($newProd);
         }
 
     }
+
+    /**
+    * @Route("/product/{id}",  methods={"GET"})
+    */
+    public function singleproductAction($id)
+    {
+        if($id == '242')
+        {
+            return $this->respond([
+                'id_mp' => 242,
+                'prod_name' => 'Нурофен',
+                'in_work' => 1,
+                'date_insert' => "19.08.2019",
+            ]);
+        }else{
+            return $this->respond([
+                'id_mp' => 543,
+                'prod_name' => 'Ношпа',
+                'in_work' => 1,
+                'date_insert' => "19.08.2019",
+            ]);
+        }
+    }
+
+
 
     /**
     * @Route("/product/closeproduct/{id}/{userID}/{token}",  methods={"GET"})
@@ -161,29 +150,4 @@ class ProductController extends ApiController
         $em->flush();
         return $this->respond('DONE');
     }
-
-    /**
-    * @Route("/product/mass",  methods={"POST"})
-    */
-    /*
-    public function massProductAction($prods)
-    {
-        if($id == '242')
-        {
-            return $this->respond([
-                'id_mp' => 242,
-                'prod_name' => 'Нурофен',
-                'in_work' => 1,
-                'date_insert' => "19.08.2019",
-            ]);
-        }else{
-            return $this->respond([
-                'id_mp' => 543,
-                'prod_name' => 'Ношпа',
-                'in_work' => 1,
-                'date_insert' => "19.08.2019",
-            ]);
-        }
-    }
-    */
 }

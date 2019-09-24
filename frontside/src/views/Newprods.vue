@@ -24,7 +24,7 @@
             <tr v-for="(item, index) in items" :key="index"  class="product-table-item" @dblclick="openModal(item.id_mp)">
               <td>{{ item.id_mp }}</td>
               <td>{{ item.prod_name }}</td>
-              <td>{{ item.date_insert }}</td>
+              <!-- <td>{{ item.date_insert }}</td> -->
               <td>{{ item.in_work == 1 ? "Да" : 'Нет' }}</td>
             </tr>
           </tbody>
@@ -55,7 +55,7 @@
         let self = this;
         self.countDown();
         self.$store.commit('updateLoad', true);
-        axiosXHR.methods.sendRequest('rest/product', function(response){
+        axiosXHR.methods.sendRequest('rest/new-product', function(response){
             self.$store.commit('updateLoad', false);
             if(response.data == 'BAD_AUTH'){
                 router.push('login');
@@ -106,7 +106,7 @@
       {
           let self = this;
           self.$store.commit('updateLoad', true);
-          axiosXHR.methods.sendRequest('rest/product', function(response){
+          axiosXHR.methods.sendRequest('rest/new-product', function(response){
               self.$store.commit('updateLoad', false);
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
@@ -122,7 +122,7 @@
           let self = this;
           let token = cookie.methods.getCookie("token");
           self.$store.commit('updateLoad', true);
-          axiosXHR.methods.sendRequest('rest/product/openproduct/' + id_mp+ '/'+ self.userData.id + '/' + token, function(response){
+          axiosXHR.methods.sendRequest('rest/new-product/openproduct/' + id_mp+ '/'+ self.userData.id + '/' + token, function(response){
               self.$store.commit('updateLoad', false);
               if(response.data == 'BAD_AUTH'){
                   router.push('login');
@@ -173,7 +173,7 @@
         headers: [
           { text: 'ID Товара', value: 'id_mp' },
           { text: 'Название', value: 'prod_name' },
-          { text: 'Дата добавления', value: 'date_insert' },
+          // { text: 'Дата добавления', value: 'date_insert' },
           { text: 'В работе', value: 'in_work' },
           // { text: 'Правка', value: 'action', sortable: false },
         ],

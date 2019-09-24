@@ -31,6 +31,7 @@ class InputController extends ApiController
         {
             if(!empty($brands[$gamma['idBrand']]))
             {
+                $gamma['name'] .= ' | '. $brands[$gamma['idBrand']]['name'];
                 $brands[$gamma['idBrand']]['childs'][] = $gamma;
             }
 

@@ -28,6 +28,53 @@ class OracleDB
         oci_execute($sti);
     }
 
+    public function getNewProdsList(array $inWork = []): Array
+    {
+        $sql = "SELECT * FROM v_new_goods ORDER BY NM_MP ASC";
+        $sti = oci_parse($this->oracle, $sql);
+        oci_execute($sti);
+        $res = [];
+        while($result = oci_fetch_assoc($sti))
+        {
+            $res[] = [
+                'id_mp' => $result['ID_MP'],
+                'prod_name' => $result['NM_MP'],
+                'in_work' => in_array($result['ID_MP'], $inWork),
+            ];
+        }
+        return $res;
+    }
+
+    public function getNewProdByID(int $id): array
+    {
+        $sql = "SELECT * FROM v_new_goods WHERE ID_MP = $id";
+        $sti = oci_parse($this->oracle, $sql);
+        oci_execute($sti);
+        $res = [];
+        if($result = oci_fetch_assoc($sti))
+        {
+            $res = [
+                'id_mp' => $result['ID_MP'],
+                'prod_name'=> $result['NM_MP'],
+                'recipe'  => $result['IS_RECIPE'],
+                'cont'    => $result['IS_CONT'],
+                'IS_SHNM_MESS' => $result['IS_SHNM_MESS'],
+                'IS_SC_TEXT' => $result['IS_SC_TEXT'],
+                'IS_LAT_NAME' => $result['IS_LAT_NAME'],
+                'IS_RUS_NAME' => $result['IS_RUS_NAME'],
+                'IS_FORM' => $result['IS_FORM'],
+                'IS_FIRM' => $result['IS_FIRM'],
+                'IS_UPAC' => $result['IS_UPAC'],
+                'IS_MNN' => $result['IS_MNN'],
+                'IS_AMOUNT' => $result['IS_AMOUNT'],
+                'ID_FORM' => $result['ID_FORM'],
+                'FORM_NAME' => $result['FORM_NAME'],
+                'FORM_SH_NAME' => $result['FORM_SH_NAME'],
+            ];
+        }
+        return $res;
+    }
+
     public function getDescriptByID(int $id): array
     {
         $sql = "SELECT ID_PPD, DESCR_NAME, DESCR, CONTRAIND, COMPOS, METHOD_USE, HOW_USE 
@@ -55,7 +102,7 @@ class OracleDB
         $sti = oci_parse($this->oracle, $sql);
         oci_execute($sti);
         $res = [];
-        if ($result = oci_fetch_assoc($sti)) {
+        while ($result = oci_fetch_assoc($sti)) {
             $res[] = [
                 'id' => $result['ID_PPD'],
                 'name' => $result['DESCR_NAME'],
