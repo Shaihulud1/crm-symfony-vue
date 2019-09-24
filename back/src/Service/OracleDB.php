@@ -12,6 +12,7 @@ class OracleDB
     
     public function __construct(?Int $userID, ?String $userName)
     {
+
         $this->oracle = \oci_connect(self::ORNAME, self::ORPASS, self::ORCONN, self::ORCHST);
         $this->userID = $userID;
         $this->userName = $userName;
@@ -25,6 +26,47 @@ class OracleDB
         oci_bind_by_name($sti,':p_id_user', $this->userID, -1);
         oci_bind_by_name($sti,':p_user_name', $this->userName, -1);
         oci_execute($sti);
+    }
+
+    public function getDescriptByID(int $id): array
+    {
+        $sql = "SELECT ID_PPD, DESCR_NAME, DESCR, CONTRAIND, COMPOS, METHOD_USE, HOW_USE 
+                    FROM v_pp_description WHERE ID_PPD = $id ORDER BY DESCR_NAME ASC";
+        $sti = oci_parse($this->oracle, $sql);
+        oci_execute($sti);
+        $res = [];
+        if ($result = oci_fetch_assoc($sti)) {
+            $res = [
+                'id' => $result['ID_PPD'],
+                'name' => $result['DESCR_NAME'],
+                'detail' => $result['DESCR']->load(),
+                'contra' => $result['CONTRAIND']->load(),
+                'struct' => $result['COMPOS']->load(),
+                'methoduse' => $result['METHOD_USE']->load(),
+                'how_use' => $result['HOW_USE']->load(),
+            ];
+        }
+        return $res;        
+    }
+    
+    public function getDescripts(): array
+    {   
+        $sql = "SELECT ID_PPD, DESCR_NAME FROM v_pp_description ORDER BY DESCR_NAME ASC";
+        $sti = oci_parse($this->oracle, $sql);
+        oci_execute($sti);
+        $res = [];
+        if ($result = oci_fetch_assoc($sti)) {
+            $res[] = [
+                'id' => $result['ID_PPD'],
+                'name' => $result['DESCR_NAME'],
+                // 'detail' => $result['DESCR']->load(),
+                // 'contra' => $result['CONTRAIND']->load(),
+                // 'struct' => $result['COMPOS']->load(),
+                // 'methoduse' => $result['METHOD_USE']->load(),
+                // 'how_use' => $result['HOW_USE']->load(),
+            ];
+        }
+        return $res;
     }
 
     public function getGammas(): array
@@ -122,6 +164,21 @@ class OracleDB
             ];
         } 
         return $res;  
+    }
+
+    public function getMnns()
+    {
+        $sql = "SELECT * FROM v_mnn_single";
+        $sti = oci_parse($this->oracle, $sql); 
+        oci_execute($sti); 
+        $res = [];
+        while ($result = oci_fetch_assoc($sti)) {
+            $res[] = [
+                'id' => $result['ID_MNNS'],
+                'name' => $result['MNN_NAME'],
+            ];
+        }
+        return $res;
     }
 
 

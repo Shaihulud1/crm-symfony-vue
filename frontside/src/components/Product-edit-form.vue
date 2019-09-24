@@ -1,7 +1,6 @@
 <template>
     <v-dialog v-model="show" persistent>
       <v-card>
-
         <v-toolbar color="blue white--text">
           <v-toolbar-title>Товар (*Создание) + Нурофен 2.5 гр</v-toolbar-title>
           <div class="flex-grow-1"></div>
@@ -12,7 +11,6 @@
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
-
         <v-card-title class="headline">
           ID: {{ id_mp }} <br>
           Название из Вита-системы: 
@@ -102,7 +100,6 @@
                   <v-data-table
                       :headers="propHeaders"
                       :items="propItems"
-                      hide-default-footer
                       class="elevation-1"
                     >
                     <template v-slot:body="{ items }">
@@ -128,8 +125,13 @@
                   </v-data-table>
                   <v-dialog v-model="propsAdd">
                       <v-card>
-                            <v-card-title class="headline">Свойства</v-card-title>
-
+                            <v-toolbar>
+                              <v-toolbar-title>Справочник cвойств</v-toolbar-title>
+                              <div class="flex-grow-1"></div>
+                              <v-btn icon @click="propsAdd = false">
+                                <v-icon>mdi-close</v-icon>
+                              </v-btn>
+                            </v-toolbar>
                             <v-card-text>
                               <v-text-field
                                  v-model="searchProp"
@@ -147,7 +149,6 @@
                                 item-key="id"
                                 show-select
                                 class="elevation-1"
-                                hide-default-footer
                               >
                             </v-data-table>
                       </v-card>
@@ -155,7 +156,6 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
-
           <v-tab-item>
             <v-card flat>
               <v-card-text>
@@ -222,7 +222,6 @@
                   <v-data-table
                       :headers="mnnHeaders"
                       :items="mnnItems" 
-                      hide-default-footer
                       class="elevation-1"
                     >
                     <template v-slot:body="{ items }">
@@ -246,7 +245,13 @@
                   </v-data-table>
                   <v-dialog v-model="mnnAdd">
                       <v-card>
-                            <v-card-title class="headline">Mnn</v-card-title>
+                            <v-toolbar>
+                              <v-toolbar-title>Справочник МНН</v-toolbar-title>
+                              <div class="flex-grow-1"></div>
+                              <v-btn icon @click="mnnAdd = false">
+                                <v-icon>mdi-close</v-icon>
+                              </v-btn>
+                            </v-toolbar>
 
                             <v-card-text>
                               <v-text-field
@@ -265,7 +270,6 @@
                                 item-key="id"
                                 show-select
                                 class="elevation-1"
-                                hide-default-footer
                               >
                             </v-data-table>
                       </v-card>
@@ -276,6 +280,45 @@
 
           <v-tab-item>
             <v-card flat>
+              <v-card-text>
+                <v-btn small color="blue white--text" @click="descUploadDB">Загрузить из справочника</v-btn>
+                <v-checkbox @change="uploadCheckChange" :input-value="selectedDesc.length > 0 ? true : false" :disabled="selectedDesc.length < 1 ? true : false" label="Описание загружено из справочника"></v-checkbox>
+                <v-dialog v-model="descUpload">
+                  <v-card>
+                        <v-toolbar>
+                          <v-toolbar-title>Справочник описаний</v-toolbar-title>
+                          <div class="flex-grow-1"></div>
+                          <v-btn icon @click="descUpload = false">
+                            <v-icon>mdi-close</v-icon>
+                          </v-btn>
+                        </v-toolbar>
+                        <v-card-text>
+                          <v-text-field
+                              v-model="searchDesc"
+                              append-icon="search"
+                              label="Поиск"
+                              single-line
+                              hide-details
+                            ></v-text-field>
+                        </v-card-text>
+                        <v-data-table
+                            v-model="selectedDesc"
+                            :headers="descHeaders"
+                            :items="descsAll"
+                            :search="searchDesc"
+                            item-key="id"
+                            show-select
+                            single-select
+                            class="elevation-1"
+                          >
+                        </v-data-table>
+                        <v-card-text>
+                            <p style="color:red;" v-if="uploadDescError">{{ uploadDescError }}</p>
+                            <v-btn class="prod-popup-btn" color="success" small @click="uploadDescFun">Загрузить выбранное описание</v-btn>
+                        </v-card-text>
+                  </v-card>
+              </v-dialog>
+              </v-card-text>
               <v-card-text>
                 <v-tabs vertical>
                   <v-tab>
@@ -296,11 +339,20 @@
                   <v-tab-item>
                     <v-card flat>
                       <v-card-text>
+                           <v-text-field
+                            background-color="amber lighten-4"
+                            v-model="descName"
+                            label="Название описания"
+                            hide-details
+                            :disabled="selectedDesc.length > 0 ? true: false"
+                          ></v-text-field>
                           <v-textarea
                             background-color="amber lighten-4"
                             color="blue"
                             label="Подробное описание"
                             v-model="detail"
+                            :value="detail"
+                            :disabled="selectedDesc.length > 0 ? true: false"
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -313,6 +365,8 @@
                             color="blue"
                             label="Показания к применению"
                             v-model="howuse"
+                            :value="howuse"
+                            :disabled="selectedDesc.length > 0 ? true: false"
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -325,6 +379,8 @@
                             color="blue"
                             label="Способ применения"
                             v-model="methoduse"
+                            :value="methoduse"
+                            :disabled="selectedDesc.length > 0 ? true: false"
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -337,6 +393,8 @@
                             color="blue"
                             label="Состав"
                             v-model="struct"
+                            :value="struct"
+                            :disabled="selectedDesc.length > 0 ? true: false"
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -349,6 +407,8 @@
                             color="blue"
                             label="Противопоказания"
                             v-model="contra"
+                            :value="contra"
+                            :disabled="selectedDesc.length > 0 ? true: false"
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -380,6 +440,7 @@ export default {
       uploadInputs: Boolean,
     },
     watch: {
+
         formProd: function(e)
         {
             let formsSelect = this.$store.getters.prodFormSelect;
@@ -539,6 +600,69 @@ export default {
         }
     },
     methods: {
+      uploadCheckChange: function(e)
+      {
+          if(!e){
+              this.selectedDesc = [];
+          }
+      },
+      
+      uploadDescFun: function()
+      {
+          let self = this;
+          if(self.selectedDesc.length == 0 || !self.selectedDesc[0].id)
+          {
+              self.uploadDescError = "Описание не выбрано";
+              return;
+          }
+          let selectedDesc = self.selectedDesc[0].id;
+
+          self.$store.commit('updateLoad', true);
+          axiosXHR.methods.sendRequest('rest/inputs/desc/' + selectedDesc, function(response){
+              self.$store.commit('updateLoad', false);
+              if(response.data == 'BAD_AUTH'){
+                  router.push('login');
+              }
+              else if(response.data == 'EMPTY_DATA')
+              {
+                  self.uploadDescError = "Описание не найдено в справочнике";
+              }else{
+                  self.selectedDesc.push([{id: response.data.id, name: response.data.name}]);
+                  self.descName = response.data.name;
+                  self.detail = response.data.detail;
+                  self.contra = response.data.contra;
+                  self.struct = response.data.struct;
+                  self.methoduse = response.data.methoduse;
+                  self.howuse = response.data.how_use;
+                  self.descUpload = false;
+              }
+          });
+      },
+      descUploadDB: function()
+      {
+        let self = this;
+        self.uploadDescError = "";
+         self.$store.commit('updateLoad', true); 
+         axiosXHR.methods.sendRequest('rest/inputs/desc', function(response){
+           self.$store.commit('updateLoad', false);
+              if(response.data == 'BAD_AUTH'){
+                router.push('login');
+              }
+              self.descsAll = [];
+              response.data.forEach(function(elem){
+                self.descsAll.push({
+                  id: elem.id, 
+                      name: elem.name, 
+                      // detail: elem.detail, 
+                      // how_use: elem.how_use,
+                      // methoduse: elem.methoduse,
+                      // struct: elem.struct,
+                      // contra: elem.contra,
+                  });
+              });
+              self.descUpload = true;
+         });
+      },
       toUpperCaseFirstLetter: function(string)
       {
           return string.charAt(0).toUpperCase() + string.slice(1);
@@ -739,13 +863,25 @@ export default {
             { text: 'Подраздел', value: 'subsection' },
             { text: 'Активность', value: 'isActive' },
         ],
+        descHeaders: [
+            { text: 'ID', value: 'id' },
+            { text: 'Название', value: 'name' },
+            // { text: 'Подробное описание', value: 'detail' },
+            // { text: 'Показания к применению', value: 'how_use' },
+            // { text: 'Способ применения', value: 'methoduse' },
+            // { text: 'Состав', value: 'struct' },
+            // { text: 'Противопоказания', value: 'contra' },
+        ],
         propsAll: [],
+        descsAll: [],
         mnnAll: [],
         disabledPropBtn: true,
         searchProp: "",
         propsAdd: false,
+        descUpload: false,
         searchMnn: "",
         mnnAdd: false,
+        searchDesc: "",
         sectionSelectData: [],
         subSectionSelectData: [],
         brandSelectData: [],
@@ -771,7 +907,7 @@ export default {
             formProd: "",
             formProdShort:"",
             requiredSelectRules: [
-                v => !!v || 'Название не может быть пустым',
+              v => !!v || 'Название не может быть пустым',
             ],
            /**/
            /*tab2*/
@@ -795,6 +931,9 @@ export default {
             mnnItems: [],
            /**/
            /*tab3*/
+            uploadDescError: "",
+            descName: "",
+            selectedDesc: [],
             detail: "",
             howuse: "",
             methoduse: "",
@@ -808,9 +947,12 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style>
   .prod-popup-btn{
     margin-right: 15px;
+  }
+  div.v-list-item--disabled{
+    display: none !important;
   }
 
 </style>

@@ -25,7 +25,7 @@
               <td>{{ item.id_mp }}</td>
               <td>{{ item.prod_name }}</td>
               <td>{{ item.date_insert }}</td>
-              <td>{{ item.in_work }}</td>
+              <td>{{ item.in_work == 1 ? "Да" : 'Нет' }}</td>
             </tr>
           </tbody>
         </template>

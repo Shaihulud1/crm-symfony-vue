@@ -39,6 +39,38 @@ class InputController extends ApiController
         return $this->respond($brands);
     }
 
+
+    /**
+     * @Route("/desc",  methods={"GET"})
+     */
+    public function descUploadAction(EntityManagerInterface $em, Request $request)
+    {
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $descrs = $oracleDB->getDescripts();
+        return $this->respond($descrs);
+
+    }
+
+
+    /**
+     * @Route("/desc/{id}",  methods={"GET"})
+     */
+    public function descSingleAction($id, EntityManagerInterface $em, Request $request)
+    {
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $descr = $oracleDB->getDescriptByID($id);
+        return $this->respond(!empty($descr) ? $descr : "EMPTY_DATA");
+
+    }
+
     /**
      * @Route("/section",  methods={"GET"})
      */
@@ -82,20 +114,15 @@ class InputController extends ApiController
     /**
      * @Route("/mnn",  methods={"GET"})
      */
-    public function mnnAction()
+    public function mnnAction(EntityManagerInterface $em, Request $request)
     {
-        return $this->respond([
-            [
-                'id' => 1,
-                'name' => 'Mnn1',
-                'isActive' => 'Да',
-            ],
-            [
-                'id' => 2,
-                'name' => 'Mnn2',
-                'isActive' => 'Да',
-            ],
-        ]);
+        $token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $userData = $em->getRepository(User::class)->findOneBy(['apitoken' => $token]);
+        if(!$userData){return $this->respond('BAD_AUTH');}
+
+        $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
+        $mnns = $oracleDB->getMnns();
+        return $this->respond($mnns);
     }
 
 
