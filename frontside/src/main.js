@@ -13,7 +13,7 @@ Vue.component('login', login);
 //global local storage plugin
 import persistentState from 'vue-persistent-state'
 const initialState = {
-   collapsedProducts: [],
+   collapsedProducts: {newProds: []},
    userData: {fullName:'', id: ''},
    timers: {disableReloadTimer: 0},
 };

@@ -30,47 +30,74 @@ class OracleDB
 
     public function getNewProdsList(array $inWork = []): Array
     {
-        $sql = "SELECT * FROM v_new_goods ORDER BY NM_MP ASC";
+        $sql = "SELECT ID_MP, NM_MP, DT_CREATE FROM v_new_goods ORDER BY NM_MP ASC";
         $sti = oci_parse($this->oracle, $sql);
         oci_execute($sti);
         $res = [];
         while($result = oci_fetch_assoc($sti))
         {
+            if(empty(trim($result['ID_MP'])) || empty(trim($result['NM_MP']))){
+                continue;
+            }
+            $d = "";
+            if($result['DT_CREATE'])
+            {
+                $d = new \DateTime($result['DT_CREATE']);
+                $d = $d->format('d-m-Y');
+            }
             $res[] = [
                 'id_mp' => $result['ID_MP'],
                 'prod_name' => $result['NM_MP'],
                 'in_work' => in_array($result['ID_MP'], $inWork),
+                'date_insert' => $d,
             ];
         }
         return $res;
     }
 
-    public function getNewProdByID(int $id): array
+    public function getNewProdByID($id): array
     {
-        $sql = "SELECT * FROM v_new_goods WHERE ID_MP = $id";
+        $where = "WHERE ID_MP ";
+        $where .= is_array($id) ? "in (".implode(', ', $id).")" : "= $id";
+        $sql = "SELECT * FROM v_new_goods $where";
         $sti = oci_parse($this->oracle, $sql);
         oci_execute($sti);
         $res = [];
-        if($result = oci_fetch_assoc($sti))
-        {
-            $res = [
-                'id_mp' => $result['ID_MP'],
-                'prod_name'=> $result['NM_MP'],
-                'recipe'  => $result['IS_RECIPE'],
-                'cont'    => $result['IS_CONT'],
-                'IS_SHNM_MESS' => $result['IS_SHNM_MESS'],
-                'IS_SC_TEXT' => $result['IS_SC_TEXT'],
-                'IS_LAT_NAME' => $result['IS_LAT_NAME'],
-                'IS_RUS_NAME' => $result['IS_RUS_NAME'],
-                'IS_FORM' => $result['IS_FORM'],
-                'IS_FIRM' => $result['IS_FIRM'],
-                'IS_UPAC' => $result['IS_UPAC'],
-                'IS_MNN' => $result['IS_MNN'],
-                'IS_AMOUNT' => $result['IS_AMOUNT'],
-                'ID_FORM' => $result['ID_FORM'],
-                'FORM_NAME' => $result['FORM_NAME'],
-                'FORM_SH_NAME' => $result['FORM_SH_NAME'],
-            ];
+        $defaultArr = [
+            'propItems' => [],
+            'prodItems' => [],
+            'brand' => "",
+            'gammas' => [],
+            'subsection' => "",
+            'formProd' => "",
+            'formProdShort' => "",
+            'box' => "",
+            'manufactory' => "",
+            'formProd2' => "",
+            'dosage' => "",
+            'unit' => "",
+            'volume' => "",
+            'storageCond' => "",
+            'latinName' => "",
+            'rusName' => "",
+            'isRecipeNeeded' => false,
+            'mnnItems' => [],
+            'selectedDesc' => [],
+        ];
+        while($result = oci_fetch_assoc($sti))
+        {       
+            if(is_array($id))
+            {
+                $temp = $defaultArr;
+                $temp['id_mp'] = $result['ID_MP'];
+                $temp['prod_name'] = $result['NM_MP'];
+                $res[] = $temp;
+            }else{
+                
+                $res = $defaultArr;
+                $res['id_mp'] = $result['ID_MP'];
+                $res['prod_name'] = $result['NM_MP'];
+            }
         }
         return $res;
     }

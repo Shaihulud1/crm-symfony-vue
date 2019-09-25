@@ -7,6 +7,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\User;
 use App\Entity\InWork;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\OracleDB;
 
 /**
  * @Route("/rest/user")
@@ -58,17 +59,21 @@ class UserController extends ApiController
         ];
         $inWorks = $userData->getInWorks();
         $curTime = time();
+        $inWorkTemp = [];
         foreach($inWorks as $work)
         {
             if($work->getTimeWork() < $curTime){
                 continue;
             }
-            $result['in_work'][$work->getWorkType()][] = [
+            $inWorkTemp[$work->getWorkType()][] = [
                 'time_work' => $work->getTimeWork(),
                 'id_mp' => $work->getObjID(),
-                //from oracle
-                'prod_name' => $work->getObjID() == 543 ? 'Ношпа' : 'Нурофен',
             ];
+        }
+        if(!empty($inWorkTemp['NP'])){
+            $oracleDB = new OracleDB($userData->getId(), $userData->getFullname()); 
+            $ids = array_column($inWorkTemp['NP'], 'id_mp');
+            $result['in_work']['NP'] = $oracleDB->getNewProdByID($ids);
         }
         return $this->respond($result);
     }

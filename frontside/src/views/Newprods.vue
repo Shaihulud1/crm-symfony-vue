@@ -24,7 +24,7 @@
             <tr v-for="(item, index) in items" :key="index"  class="product-table-item" @dblclick="openModal(item.id_mp)">
               <td>{{ item.id_mp }}</td>
               <td>{{ item.prod_name }}</td>
-              <!-- <td>{{ item.date_insert }}</td> -->
+              <td>{{ item.date_insert }}</td>
               <td>{{ item.in_work == 1 ? "Да" : 'Нет' }}</td>
             </tr>
           </tbody>
@@ -129,19 +129,19 @@
               }else{
                   switch (response.data) {
                     case 'BAD_PROD':
-                        alert('Такого товара не существует, обновите страницу');
+                        alert('Такого товара не существует, обновите таблицу');
                         return;
                     break;
                     case 'IN_WORK':
-                        alert('Товар уже взят в работу другим пользователем');
+                        alert('Товар уже взят в работу другим пользователем, обновите таблицу');
                         return;
                     break;
 
                     default:
                         let modalProduct = false;
-                        if(self.collapsedProducts.length > 0)
+                        if(self.collapsedProducts.newProds.length > 0)
                         {
-                            self.collapsedProducts.forEach(function(elem){
+                            self.collapsedProducts.newProds.forEach(function(elem){
                                 if(elem.id_mp == id_mp){
                                     modalProduct = elem;
                                 }
@@ -149,14 +149,10 @@
                         }
                         if(!modalProduct){
                             modalProduct = response.data;
-                            self.collapsedProducts.push(modalProduct);
+                            self.collapsedProducts.newProds.push(modalProduct);
                         }
-                        modalProduct.nameDisplay = response.data.prod_name;
-                        self.modalData = {
-                          id_mp: id_mp || "",
-                          nameDisplay: modalProduct.prod_name || "",
-                          name: modalProduct.prod_name || "",
-                        };
+                        self.modalData = modalProduct;
+                        self.modalData.displayName = response.data.prod_name;
                         self.productFormModalForm = true;
                     break;
                   }
@@ -173,7 +169,7 @@
         headers: [
           { text: 'ID Товара', value: 'id_mp' },
           { text: 'Название', value: 'prod_name' },
-          // { text: 'Дата добавления', value: 'date_insert' },
+          { text: 'Дата добавления', value: 'date_insert' },
           { text: 'В работе', value: 'in_work' },
           // { text: 'Правка', value: 'action', sortable: false },
         ],

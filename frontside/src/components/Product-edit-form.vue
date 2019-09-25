@@ -2,9 +2,9 @@
     <v-dialog v-model="show" persistent>
       <v-card>
         <v-toolbar color="blue white--text">
-          <v-toolbar-title>Товар (*Создание) + Нурофен 2.5 гр</v-toolbar-title>
+          <v-toolbar-title>Товар (*Создание) + {{displayName}}</v-toolbar-title>
           <div class="flex-grow-1"></div>
-          <v-btn icon @click="collapseProduct">
+          <v-btn icon @click="collapseProduct(id_mp)">
             <v-icon>mdi-arrow-collapse-left</v-icon>
           </v-btn>
           <v-btn icon @click="closeProduct">
@@ -13,7 +13,7 @@
         </v-toolbar>
         <v-card-title class="headline">
           ID: {{ id_mp }} <br>
-          Название из Вита-системы: 
+          Название из Вита-системы: {{displayName}}
         </v-card-title>
         <v-card-text>
           <v-switch v-model="isProductProcessed" v-bind:label="processStatus" color="success" hide-details disabled></v-switch>
@@ -41,7 +41,7 @@
             <v-card flat>
               <v-card-text>
                   <v-text-field
-                    v-model="name"
+                    v-model="prod_name"
                     :rules="nameRules"
                     class="prod-name-input"
                     outlined
@@ -176,7 +176,7 @@
                   <v-text-field
                     v-model="formProd2"
                     outlined
-                    label="Производитель"
+                    label="Форма выпуска"
                   >
                   </v-text-field>
                   <v-text-field
@@ -282,7 +282,6 @@
             <v-card flat>
               <v-card-text>
                 <v-btn small color="blue white--text" @click="descUploadDB">Загрузить из справочника</v-btn>
-                <v-checkbox @change="uploadCheckChange" :input-value="selectedDesc.length > 0 ? true : false" :disabled="selectedDesc.length < 1 ? true : false" label="Описание загружено из справочника"></v-checkbox>
                 <v-dialog v-model="descUpload">
                   <v-card>
                         <v-toolbar>
@@ -344,7 +343,7 @@
                             v-model="descName"
                             label="Название описания"
                             hide-details
-                            :disabled="selectedDesc.length > 0 ? true: false"
+                            disabled
                           ></v-text-field>
                           <v-textarea
                             background-color="amber lighten-4"
@@ -352,7 +351,7 @@
                             label="Подробное описание"
                             v-model="detail"
                             :value="detail"
-                            :disabled="selectedDesc.length > 0 ? true: false"
+                            disabled
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -366,7 +365,7 @@
                             label="Показания к применению"
                             v-model="howuse"
                             :value="howuse"
-                            :disabled="selectedDesc.length > 0 ? true: false"
+                            disabled
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -380,7 +379,7 @@
                             label="Способ применения"
                             v-model="methoduse"
                             :value="methoduse"
-                            :disabled="selectedDesc.length > 0 ? true: false"
+                            disabled
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -394,7 +393,7 @@
                             label="Состав"
                             v-model="struct"
                             :value="struct"
-                            :disabled="selectedDesc.length > 0 ? true: false"
+                            disabled
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -408,7 +407,7 @@
                             label="Противопоказания"
                             v-model="contra"
                             :value="contra"
-                            :disabled="selectedDesc.length > 0 ? true: false"
+                            disabled
                           ></v-textarea>
                       </v-card-text>
                     </v-card>
@@ -527,6 +526,7 @@ export default {
             }
             self.isSectionSelect = !self.subsection;
             self.propItems = [];
+
         },
         brand: function(e, oldE)
         {
@@ -592,11 +592,60 @@ export default {
                 });
             }
         },
+        
         modalData: function(val)
-        {
-            this.id_mp = val.id_mp || "";
-            this.nameDisplay = val.nameDisplay || "";
-            this.name = val.name || "";
+        {//modal form init 
+            let self = this;
+            self.id_mp = val.id_mp;
+            self.watcherMove = true;
+            self.prod_name = val.prod_name;
+            self.displayName = val.displayName;
+            self.brand = typeof val.brand != 'undefined' ? val.brand : "";
+            self.gammas = typeof val.gammas != 'undefined' ? val.gammas : [];
+            self.section = typeof val.section != 'undefined' ? val.section : "";
+            self.subsection = typeof val.subsection != 'undefined' ? val.subsection : "";
+            self.formProd = typeof val.formProd != 'undefined' ? val.formProd : "";
+            self.formProdShort = typeof val.formProdShort != 'undefined' ? val.formProdShort : "";
+            self.propItems = typeof val.propItems != 'undefined' ? val.propItems : [];
+            self.box = typeof val.box != 'undefined' ? val.box : "";
+            self.manufactory = typeof val.manufactory != 'undefined' ? val.manufactory : "";
+            self.formProd2 = typeof val.formProd2 != 'undefined' ? val.formProd2 : "";
+            self.dosage = typeof val.dosage != 'undefined' ? val.dosage : "";
+            self.unit = typeof val.unit != 'undefined' ? val.unit : "";
+            self.volume = typeof val.volume != 'undefined' ? val.volume : "";
+            self.storageCond = typeof val.storageCond != 'undefined' ? val.storageCond : "";
+            self.latinName = typeof val.latinName != 'undefined' ? val.latinName : "";
+            self.rusName = typeof val.rusName != 'undefined' ? val.rusName : "";
+            self.isRecipeNeeded = typeof val.isRecipeNeeded != 'undefined' ? val.isRecipeNeeded : false;
+            self.selectedDesc = typeof val.selectedDesc != 'undefined' ? val.selectedDesc : [];
+            let emptyDesc = false;
+            if(typeof self.selectedDesc[0] != 'undefined'){
+                axiosXHR.methods.sendRequest('rest/inputs/desc/' + self.selectedDesc[0].id, function(response){
+                    if(response.data == 'BAD_AUTH'){
+                        router.push('login');
+                    }
+                    else if(response.data != 'EMPTY_DATA')
+                    {
+                        emptyDesc = true;
+                        self.descName = response.data.name;
+                        self.detail = response.data.detail;
+                        self.contra = response.data.contra;
+                        self.struct = response.data.struct;
+                        self.methoduse = response.data.methoduse;
+                        self.howuse = response.data.how_use;
+                    }
+                });
+            }else{
+                emptyDesc = true;
+            }
+            if(emptyDesc){
+                self.descName = "";
+                self.detail = "";
+                self.contra = "";
+                self.struct = "";
+                self.methoduse = "";
+                self.howuse = "";
+            }
         }
     },
     methods: {
@@ -735,8 +784,43 @@ export default {
           }
           return result;
       },
-      collapseProduct: function()
+      collapseProduct: function(id_mp)
       {
+          let self = this;
+          let foundCollapseIndex = false;
+          self.$store.commit('updateLoad', true);
+          if(typeof self.collapsedProducts.newProds != 'undefined' && id_mp){
+              self.collapsedProducts.newProds.forEach(function(elem, index){
+                  if(elem.id_mp == id_mp)
+                  {
+                      foundCollapseIndex = index;
+                  }
+              }); 
+          }
+          if(foundCollapseIndex !== false)
+          {
+              self.collapsedProducts.newProds[foundCollapseIndex].prod_name = self.prod_name;
+              self.collapsedProducts.newProds[foundCollapseIndex].brand = self.brand;
+              self.collapsedProducts.newProds[foundCollapseIndex].gammas = self.gammas;
+              self.collapsedProducts.newProds[foundCollapseIndex].section = self.section;
+              self.collapsedProducts.newProds[foundCollapseIndex].subsection = self.subsection;
+              self.collapsedProducts.newProds[foundCollapseIndex].formProd = self.formProd;
+              self.collapsedProducts.newProds[foundCollapseIndex].formProdShort = self.formProdShort;
+              self.collapsedProducts.newProds[foundCollapseIndex].propItems = self.propItems;
+              self.collapsedProducts.newProds[foundCollapseIndex].box = self.box;
+              self.collapsedProducts.newProds[foundCollapseIndex].manufactory = self.manufactory;
+              self.collapsedProducts.newProds[foundCollapseIndex].formProd2 = self.formProd2;
+              self.collapsedProducts.newProds[foundCollapseIndex].dosage = self.dosage;
+              self.collapsedProducts.newProds[foundCollapseIndex].unit = self.unit;
+              self.collapsedProducts.newProds[foundCollapseIndex].volume = self.volume;
+              self.collapsedProducts.newProds[foundCollapseIndex].storageCond = self.storageCond;
+              self.collapsedProducts.newProds[foundCollapseIndex].latinName = self.latinName;
+              self.collapsedProducts.newProds[foundCollapseIndex].rusName = self.rusName;
+              self.collapsedProducts.newProds[foundCollapseIndex].isRecipeNeeded = self.isRecipeNeeded;
+              self.collapsedProducts.newProds[foundCollapseIndex].mnnItems = self.mnnItems;
+              self.collapsedProducts.newProds[foundCollapseIndex].selectedDesc = self.selectedDesc;
+          }
+          self.$store.commit('updateLoad', false);
           this.show = false;
       },
       closeProduct: function()
@@ -752,9 +836,9 @@ export default {
                     if(response.data == 'BAD_AUTH'){
                         router.push('login');
                     }else{  
-                        self.collapsedProducts.forEach(function(elem, key){
+                        self.collapsedProducts.newProds.forEach(function(elem, key){
                             if(elem.id_mp == self.id_mp){
-                                self.collapsedProducts.splice(key, 1);
+                                self.collapsedProducts.newProds.splice(key, 1);
                             }
                         });
                         self.show = false;                      
@@ -851,6 +935,8 @@ export default {
     },
     data: () => {
       return {
+        watcherMove: false,
+        displayName: '',
         mnnHeaders: [
             { text: 'ID', value: 'id' },
             { text: 'Название', value: 'name' },
@@ -895,7 +981,7 @@ export default {
             propItems: [],
             prodItems: [],
             id_mp: 124,
-            name: "Ношпа",
+            prod_name: "",
             nameRules: [
               v => !!v || 'Название не может быть пустым',
               v => (v && v.length > 2) || 'Неверное заполнение',

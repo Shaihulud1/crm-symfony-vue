@@ -11,7 +11,7 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-          <v-system-bar window class="collapsed-product" v-for="prod in collapsedProducts" v-bind:key="prod.id_mp" @click="openCollapse(prod.id_mp)">
+          <v-system-bar window class="collapsed-product" v-for="prod in collapsedProducts.newProds" v-bind:key="prod.id_mp" @click="openCollapse(prod.id_mp)">
             <span>{{ prod.prod_name | truncate(25, '...') }}</span>
             <div class="flex-grow-1"></div>
             <v-icon>mdi-checkbox-blank-outline</v-icon>
@@ -65,8 +65,7 @@ export default {
         this.$store.dispatch('fetchProdForms');
 
 
-        var inputs = ["prodform"],
-            self = this;
+        var self = this;
         let token = cookie.methods.getCookie("token");
         axiosXHR.methods.sendRequest('rest/user/bytoken/' + token, function(response){
             if(response.data == 'BAD_AUTH'){
@@ -78,28 +77,27 @@ export default {
                 if(typeof response.data.in_work != 'undefined' && typeof response.data.in_work.NP != 'undefined')
                 {
                     response.data.in_work.NP.map((el) => {
-                    ids.push(el.id_mp);
+                        ids.push(el.id_mp);
                     });
                     response.data.in_work.NP.forEach(function(elem, index){
                         let isset = false;
-                        self.collapsedProducts.forEach(function(collapseElem){
+                        self.collapsedProducts.newProds.forEach(function(collapseElem){
                             if(elem.id_mp == collapseElem.id_mp){
                                 isset = true;
                             }
                         });
                         if(!isset){
-                            self.collapsedProducts.push(elem);
+                            self.collapsedProducts.newProds.push(elem);
                         }
                     });
                 }
-
                 if(ids.length == 0)
                 {
-                for (var i = self.collapsedProducts.length; i > 0; i--) {
-                    self.collapsedProducts.pop();
+                for (var i = self.collapsedProducts.newProds.length; i > 0; i--) {
+                    self.collapsedProducts.newProds.pop();
                 }
                 }else{
-                    self.collapsedProducts.forEach(function(collapseElem, index, object){
+                    self.collapsedProducts.newProds.forEach(function(collapseElem, index, object){
                         if(!ids.includes(collapseElem.id_mp)){
                             object.splice(index, 1);
                         }
@@ -132,15 +130,15 @@ export default {
         {
             if(confirm("Вы уверены, что хотите закрыть товар? Изменения не будут сохранены.")){
                 let self = this;
-                self.collapsedProducts.forEach(function(elem, key){
+                self.collapsedProducts.newProds.forEach(function(elem, key){
                     if(elem.id_mp == id_mp){
-                        self.collapsedProducts.splice(key, 1);
+                        self.collapsedProducts.newProds.splice(key, 1);
                     }
                 });
             }
         },
         openCollapse: function(id_mp)
-        {
+        {   
             let self = this;
             let token = cookie.methods.getCookie("token");
             self.$store.commit('updateLoad', true);
@@ -160,9 +158,9 @@ export default {
                         break;
                         default:
                             let modalProduct = false;
-                            if(self.collapsedProducts.length > 0)
+                            if(self.collapsedProducts.newProds.length > 0)
                             {
-                                self.collapsedProducts.forEach(function(elem){
+                                self.collapsedProducts.newProds.forEach(function(elem){
                                     if(elem.id_mp == id_mp){
                                         modalProduct = elem;
                                     }
@@ -170,12 +168,10 @@ export default {
                             }
                             if(!modalProduct){
                                 modalProduct = response.data;
-                                self.collapsedProducts.push(modalProduct);
+                                self.collapsedProducts.newProds.push(modalProduct);
                             }
-                            self.modalData = {
-                              id_mp: modalProduct.id_mp || "",
-                              name: modalProduct.prod_name || "",
-                            };
+                            self.modalData = modalProduct;
+                            self.modalData.displayName = response.data.prod_name;
                             self.productFormModalForm = true;
                         break;
 
