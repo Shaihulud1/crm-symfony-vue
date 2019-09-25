@@ -597,7 +597,6 @@ export default {
         {//modal form init 
             let self = this;
             self.id_mp = val.id_mp;
-            self.watcherMove = true;
             self.prod_name = val.prod_name;
             self.displayName = val.displayName;
             self.brand = typeof val.brand != 'undefined' ? val.brand : "";
@@ -648,14 +647,7 @@ export default {
             }
         }
     },
-    methods: {
-      uploadCheckChange: function(e)
-      {
-          if(!e){
-              this.selectedDesc = [];
-          }
-      },
-      
+    methods: { 
       uploadDescFun: function()
       {
           let self = this;
@@ -676,7 +668,7 @@ export default {
               {
                   self.uploadDescError = "Описание не найдено в справочнике";
               }else{
-                  self.selectedDesc.push([{id: response.data.id, name: response.data.name}]);
+                  self.selectedDesc = [{id: response.data.id, name: response.data.name}];
                   self.descName = response.data.name;
                   self.detail = response.data.detail;
                   self.contra = response.data.contra;
@@ -700,13 +692,8 @@ export default {
               self.descsAll = [];
               response.data.forEach(function(elem){
                 self.descsAll.push({
-                  id: elem.id, 
+                      id: elem.id, 
                       name: elem.name, 
-                      // detail: elem.detail, 
-                      // how_use: elem.how_use,
-                      // methoduse: elem.methoduse,
-                      // struct: elem.struct,
-                      // contra: elem.contra,
                   });
               });
               self.descUpload = true;
@@ -798,7 +785,7 @@ export default {
               }); 
           }
           if(foundCollapseIndex !== false)
-          {
+          {//make loop from this shit
               self.collapsedProducts.newProds[foundCollapseIndex].prod_name = self.prod_name;
               self.collapsedProducts.newProds[foundCollapseIndex].brand = self.brand;
               self.collapsedProducts.newProds[foundCollapseIndex].gammas = self.gammas;
@@ -935,7 +922,6 @@ export default {
     },
     data: () => {
       return {
-        watcherMove: false,
         displayName: '',
         mnnHeaders: [
             { text: 'ID', value: 'id' },
@@ -952,11 +938,6 @@ export default {
         descHeaders: [
             { text: 'ID', value: 'id' },
             { text: 'Название', value: 'name' },
-            // { text: 'Подробное описание', value: 'detail' },
-            // { text: 'Показания к применению', value: 'how_use' },
-            // { text: 'Способ применения', value: 'methoduse' },
-            // { text: 'Состав', value: 'struct' },
-            // { text: 'Противопоказания', value: 'contra' },
         ],
         propsAll: [],
         descsAll: [],
