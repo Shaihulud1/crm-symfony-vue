@@ -83,6 +83,7 @@ class OracleDB
             'isRecipeNeeded' => false,
             'mnnItems' => [],
             'selectedDesc' => [],
+            'catPrior' => false,
         ];
         while($result = oci_fetch_assoc($sti))
         {       
@@ -238,6 +239,66 @@ class OracleDB
             ];
         } 
         return $res;  
+    }
+
+    public function saveNewProd($arParams, $arParamsProps, $arMnns, $arProdForm)
+    {
+        $integers = ['p_id_mp', 'p_recipe', 'p_is_correct', 
+        'p_is_br_nm', 'p_cat_prior', 'p_id_form',
+        'p_id_ppd', 'p_id_br', 'p_id_subsec', 
+        'p_id_prop', 'p_id_gamma', 'p_cat_prior'];
+        
+        if($arProdForm['p_id_form']){
+            $sql = "SELECT FORM_NAME, ID_FORM, FORM_SH_NAME, FL_STATE FROM v_form WHERE ID_FORM = ".$arProdForm['p_id_form'];
+            $sti = oci_parse($this->oracle, $sql); 
+            oci_execute($sti);
+            if ($result = oci_fetch_assoc($sti)) {
+                $paramsForm = [$result['ID_FORM'], "'".$result['FORM_NAME']."'", "'".$arProdForm['p_form_shnm']."'", $result['FL_STATE']];
+                $paramsForm = implode(', ', $paramsForm);
+                $sql = "BEGIN filters_pack.Form_Chg($paramsForm); END;"; 
+                $sti = oci_parse($this->oracle, $sql);
+                try {
+                    @oci_execute($sti);
+                } catch (Exception $e){unset($e);}
+            }            
+        }
+        foreach($arMnns as $data)
+        {
+            $paramMnn = [$data->id, $data->id_mp];
+            $paramMnn = implode(', ', $paramMnn);
+            $sql = "declare i number; BEGIN i:=filters_pack.Mnn_Pp_Add($paramMnn); END;"; 
+            $sti = oci_parse($this->oracle, $sql);
+            try {
+                @oci_execute($sti);
+            } catch (Exception $e){unset($e);}
+        }
+        foreach($arParamsProps as $key => $propsdata)
+        {
+            $paramsProp = [];
+            foreach($propsdata as $key => $data)
+            {
+                $paramsProp[] = $data > 0 ? $data : 'null';
+            }
+            $paramsProp = implode(', ', $paramsProp);
+            $sql = "declare i number; BEGIN i:=filters_pack.Mpp_Add($paramsProp); END;";
+            $sti = oci_parse($this->oracle, $sql);
+            oci_execute($sti);
+        }
+        $params = [];
+        foreach($arParams as $key => $data)
+        {
+            if(in_array($key, $integers))
+            {
+                $data = $data > 0 ? $data : 'null';
+            }else{
+                $data = "'$data'";
+            }
+            $params[] = $data;
+        }
+        $params = implode(', ', $params);
+        $sql = "BEGIN filters_pack.phpr_chg($params); END;";
+        $sti = oci_parse($this->oracle, $sql);
+        oci_execute($sti);
     }
 
     public function getMnns()

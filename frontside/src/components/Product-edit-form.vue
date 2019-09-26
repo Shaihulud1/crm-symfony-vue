@@ -23,6 +23,9 @@
         <v-card-text>
           <v-btn class="prod-popup-btn" color="success" @click="saveProduct">Записать и закрыть</v-btn>
           <v-btn class="prod-popup-btn" color="warning" @click="closeProduct">Закрыть без изменений</v-btn>
+          <v-alert type="error" class="saveError">
+              I'm an error alert.
+          </v-alert>
         </v-card-text>
         <v-tabs centered>
           <v-tab>
@@ -94,6 +97,8 @@
                     v-model="formProdShort"
                     outlined
                     label="Форма выпуска, короткое название"
+                    :rules="requiredSelectRules"
+                    required
                   >
                   </v-text-field>
                   <p class="text-left">Свойства:  </p><v-btn small color="success" @click="propsAddPopup"  :disabled="isSectionSelect">Добавить свойство</v-btn>
@@ -109,8 +114,7 @@
                           <td>{{ item.name }}</td>
                           <td>{{ item.group }}</td>
                           <td>{{ item.subsection }}</td>
-                          <td>
-                              <!-- {{ item.isActive }} -->
+                          <!-- <td>
                               <v-select
                                 v-model="item.isActive"
                                 :rules="requiredSelectRules"
@@ -118,7 +122,7 @@
                                 required
                                 >
                               </v-select>
-                          </td>
+                          </td> -->
                         </tr>
                       </tbody>
                     </template>
@@ -159,6 +163,7 @@
           <v-tab-item>
             <v-card flat>
               <v-card-text>
+                  <v-checkbox v-model="catPrior" label="Приоритетность товара в каталоге"></v-checkbox>
                   <v-text-field
                     v-model="box"
                     outlined
@@ -181,7 +186,6 @@
                   </v-text-field>
                   <v-text-field
                     v-model="dosage"
-                    :rules="dosageRules"
                     outlined
                     label="Дозировка"
                   >
@@ -231,13 +235,13 @@
                           <td>{{ item.name }}</td>
                           <td>
                               <!-- {{ item.isActive }} -->
-                              <v-select
+                              <!-- <v-select
                                 v-model="item.isActive"
                                 :rules="requiredSelectRules"
                                 :items="['Да', 'Нет']"
                                 required
                                 >
-                              </v-select>
+                              </v-select> -->
                           </td>
                         </tr>
                       </tbody>
@@ -525,7 +529,11 @@ export default {
                 });
             }
             self.isSectionSelect = !self.subsection;
-            self.propItems = [];
+            if(!self.modalInit){
+                self.propItems = [];
+            }else{
+                self.modalInit = false;
+            }
 
         },
         brand: function(e, oldE)
@@ -596,9 +604,11 @@ export default {
         modalData: function(val)
         {//modal form init 
             let self = this;
+            self.modalInit = true;
             self.id_mp = val.id_mp;
             self.prod_name = val.prod_name;
             self.displayName = val.displayName;
+            self.catPrior = typeof val.catPrior != 'undefined' ? val.catPrior : false;
             self.brand = typeof val.brand != 'undefined' ? val.brand : "";
             self.gammas = typeof val.gammas != 'undefined' ? val.gammas : [];
             self.section = typeof val.section != 'undefined' ? val.section : "";
@@ -645,6 +655,7 @@ export default {
                 self.methoduse = "";
                 self.howuse = "";
             }
+            console.log('test');
         }
     },
     methods: { 
@@ -786,7 +797,9 @@ export default {
           }
           if(foundCollapseIndex !== false)
           {//make loop from this shit
+              console.log( self.collapsedProducts.newProds[foundCollapseIndex]);
               self.collapsedProducts.newProds[foundCollapseIndex].prod_name = self.prod_name;
+              self.collapsedProducts.newProds[foundCollapseIndex].catPrior = self.catPrior;
               self.collapsedProducts.newProds[foundCollapseIndex].brand = self.brand;
               self.collapsedProducts.newProds[foundCollapseIndex].gammas = self.gammas;
               self.collapsedProducts.newProds[foundCollapseIndex].section = self.section;
@@ -837,6 +850,54 @@ export default {
       },
       saveProduct: function()
       {
+          //self.$store.commit('updateLoad', true);
+          let token = cookie.methods.getCookie("token");
+          let dataProduct = new FormData();
+          dataProduct.append('id_mp', this.id_mp);
+          dataProduct.append('prod_name', this.prod_name);
+          dataProduct.append('box', this.box);
+          dataProduct.append('manufactory', this.manufactory);
+          dataProduct.append('formprod', this.formProd2);
+          dataProduct.append('dosage', this.dosage);
+          dataProduct.append('unit', this.unit);
+          dataProduct.append('volume', this.volume);
+          dataProduct.append('storageCond', this.storageCond);
+          dataProduct.append('latinName', this.latinName);
+          dataProduct.append('rusName', this.rusName);
+          dataProduct.append('isRecipeNeeded', this.isRecipeNeeded);
+          dataProduct.append('isProductProcessed', this.isProductProcessed);
+          dataProduct.append('formProd', this.formProd);
+          dataProduct.append('formProdShort', this.formProdShort);
+          dataProduct.append('catPrior', this.catPrior);
+          if(typeof this.selectedDesc[0] != 'undefined' && typeof this.selectedDesc[0].id != 'undefined')
+          {
+              dataProduct.append('selectedDesc', this.selectedDesc[0].id);
+          }
+          else
+          {
+              dataProduct.append('selectedDesc', false);
+          } 
+
+          dataProduct.append('auth', token);
+
+          dataProduct.append('brand', this.gammas);
+          dataProduct.append('gamma', (typeof this.brand.value != 'undefined' ? this.brand.value : false ));
+          dataProduct.append('section', (typeof this.section.value != 'undefined' ? this.section.value : false ));
+          dataProduct.append('subsection', this.subsection);
+ 
+          dataProduct.append('propItems', JSON.stringify(this.propItems));
+          dataProduct.append('mnnItems', JSON.stringify(this.mnnItems));
+
+          axiosXHR.methods.sendRequest('rest/product/save-product', 
+              function(response){
+                  self.$store.commit('updateLoad', false);
+                  if(response.data == 'BAD_AUTH'){
+                      router.push('login');
+                  }else{  
+                      console.log('yeee');
+                  }
+              }, 'post', dataProduct
+          );
 
       }
     },
@@ -922,18 +983,20 @@ export default {
     },
     data: () => {
       return {
+        modalInit: false,
+        saveErrors: [],
         displayName: '',
         mnnHeaders: [
             { text: 'ID', value: 'id' },
             { text: 'Название', value: 'name' },
-            { text: 'Активность', value: 'isActive' },
+           // { text: 'Активность', value: 'isActive' },
         ],
         propHeaders: [
             { text: 'ID', value: 'id' },
             { text: 'Название', value: 'name' },
             { text: 'Группа свойства', value: 'group' },
             { text: 'Подраздел', value: 'subsection' },
-            { text: 'Активность', value: 'isActive' },
+           // { text: 'Активность', value: 'isActive' },
         ],
         descHeaders: [
             { text: 'ID', value: 'id' },
@@ -954,7 +1017,7 @@ export default {
         brandSelectData: [],
         gammaSelectData: [],
         selectData: false,
-        isProductProcessed: true,
+        isProductProcessed: false,
         /*form*/
           /*tab1*/
             brandItems: [],
@@ -974,10 +1037,11 @@ export default {
             formProd: "",
             formProdShort:"",
             requiredSelectRules: [
-              v => !!v || 'Название не может быть пустым',
+              v => !!v || 'Поле не может быть пустым',
             ],
            /**/
            /*tab2*/
+            catPrior: false,
             box: "",
             manufactory:"",
             manufactoryRules: [
@@ -1015,6 +1079,9 @@ export default {
 </script>
 
 <style>
+  .saveError{
+    margin-top: 20px;
+  }
   .prod-popup-btn{
     margin-right: 15px;
   }

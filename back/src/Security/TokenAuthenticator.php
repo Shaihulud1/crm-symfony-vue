@@ -33,7 +33,11 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        $this->token = $request->isMethod("GET") ? $request->query->get('auth') : $request->request->get("auth");
+        $this->token = $request->query->get('auth');
+        if(!trim($this->token))
+        {
+            $this->token = $request->request->get("auth");
+        }
         return $this->token;
         //return $request->headers->has('X-AUTH-TOKEN');
     }

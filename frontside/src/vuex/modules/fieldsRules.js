@@ -10,39 +10,48 @@ export default {
         // }
     },
     state: {
-        sectionRequireFields: {
-            1: {
+        sectionRequireFields: [
+            {
+                name: 'all',
+                require: {prod_name: 'Наименование', section: 'Раздел', subsection: 'Подраздел',  
+                          formProd: 'Форма выпуска', formProdShort: 'Сокращенная форма выпуска', 
+                          manufactory: 'Производитель'},
+            },
+            {
                 name: 'Лекарства и Бады',
-                require: ['dosage', 'unit', 'volume'],
+                require: {dosage: 'Дозировка', unit: 'Единица измерения', 
+                          volume: 'Кол-во в упаковке'},
             }, 
-            2: {
+            {
                 name: 'Активная косметика',
-                require: ['dosage', 'unit', 'volume'],
+                require: {volume: 'Кол-во в упаковке', latinName: 'Название на латинском', 
+                          rusName: 'Название на русском', brand: 'Бренд'},
             },
-            3: {
+            {
                 name: 'Мама и малыш',
-                require: ['dosage', 'unit', 'volume'],
+                require: {brand: 'Бренд', unit: 'Единица измерения', 
+                          latinName: 'Название на латинском', rusName: 'Название на русском'},
             },
-            4: {
+            {
                 name: 'Медицинские приборы',
-                require: ['dosage', 'unit', 'volume'],
+                require: {latinName: 'Название на латинском', rusName: 'Название на русском',
+                          brand: 'Бренд'},
             },
-            5: {
+            {
                 name: 'Ортопедия',
-                require: ['dosage', 'unit', 'volume'],
+                require: {brand: 'Бренд', volume: 'Кол-во в упаковке', 
+                          latinName: 'Название на латинском', rusName: 'Название на русском'},
             },
-            6: {
+            {
                 name: 'Красота и здоровье',
-                require: ['dosage', 'unit', 'volume'],
+                require: {brand: 'Бренд', volume: 'Кол-во в упаковке', 
+                          latinName: 'Название на латинском', rusName: 'Название на русском'},
             }
-        }
+        ]
     },
     getters: {
-        sectionRequireFields: function (state, sectID){
-            let sectRequire = state.sectionRequireFields;
-            if (sectRequire.sectID != 'undefined'){
-                return sectRequire.sectID;
-            }
-        },
+        sectionRequireFields(state) {
+            return state.sectionRequireFields
+        }
     },
 }

@@ -52,6 +52,7 @@
     name: "NewProductsList",
     mounted: function()
     {
+        console.log(this.$store);
         let self = this;
         self.countDown();
         self.$store.commit('updateLoad', true);
