@@ -127,8 +127,8 @@
                       </tbody>
                     </template>
                   </v-data-table>
-                  <v-dialog v-model="propsAdd">
-                      <v-card>
+                  <v-dialog v-model="propsAdd" scrollable>
+                        <v-card >
                             <v-toolbar>
                               <v-toolbar-title>Справочник cвойств</v-toolbar-title>
                               <div class="flex-grow-1"></div>
@@ -137,25 +137,25 @@
                               </v-btn>
                             </v-toolbar>
                             <v-card-text>
-                              <v-text-field
-                                 v-model="searchProp"
-                                 append-icon="search"
-                                 label="Поиск"
-                                 single-line
-                                 hide-details
-                               ></v-text-field>
+                                <v-text-field
+                                  v-model="searchProp"
+                                  append-icon="search"
+                                  label="Поиск"
+                                  single-line
+                                  hide-details
+                                ></v-text-field>
+                                <v-data-table
+                                    v-model="propItems"
+                                    :headers="propHeaders"
+                                    :items="propsAll"
+                                    :search="searchProp"
+                                    item-key="id"
+                                    show-select
+                                    class="elevation-1"
+                                  >
+                                </v-data-table>
                             </v-card-text>
-                            <v-data-table
-                                v-model="propItems"
-                                :headers="propHeaders"
-                                :items="propsAll"
-                                :search="searchProp"
-                                item-key="id"
-                                show-select
-                                class="elevation-1"
-                              >
-                            </v-data-table>
-                      </v-card>
+                        </v-card>
                     </v-dialog>
               </v-card-text>
             </v-card>
@@ -247,7 +247,7 @@
                       </tbody>
                     </template>
                   </v-data-table>
-                  <v-dialog v-model="mnnAdd">
+                  <v-dialog v-model="mnnAdd" scrollable>
                       <v-card>
                             <v-toolbar>
                               <v-toolbar-title>Справочник МНН</v-toolbar-title>
@@ -265,17 +265,18 @@
                                  single-line
                                  hide-details
                                ></v-text-field>
+                            
+                              <v-data-table
+                                  v-model="mnnItems"
+                                  :headers="mnnHeaders"
+                                  :items="mnnAll"
+                                  :search="searchMnn"
+                                  item-key="id"
+                                  show-select
+                                  class="elevation-1"
+                                >
+                              </v-data-table>
                             </v-card-text>
-                            <v-data-table
-                                v-model="mnnItems"
-                                :headers="mnnHeaders"
-                                :items="mnnAll"
-                                :search="searchMnn"
-                                item-key="id"
-                                show-select
-                                class="elevation-1"
-                              >
-                            </v-data-table>
                       </v-card>
                     </v-dialog>
               </v-card-text>
@@ -286,35 +287,37 @@
             <v-card flat>
               <v-card-text>
                 <v-btn small color="blue white--text" @click="descUploadDB">Загрузить из справочника</v-btn>
-                <v-dialog v-model="descUpload">
+                <v-dialog v-model="descUpload" scrollable>
                   <v-card>
                         <v-toolbar>
-                          <v-toolbar-title>Справочник описаний</v-toolbar-title>
-                          <div class="flex-grow-1"></div>
-                          <v-btn icon @click="descUpload = false">
-                            <v-icon>mdi-close</v-icon>
-                          </v-btn>
+                            <v-toolbar-title>Справочник описаний</v-toolbar-title>
+                            <div class="flex-grow-1"></div>
+                            <v-btn icon @click="descUpload = false">
+                              <v-icon>mdi-close</v-icon>
+                            </v-btn>
                         </v-toolbar>
                         <v-card-text>
-                          <v-text-field
-                              v-model="searchDesc"
-                              append-icon="search"
-                              label="Поиск"
-                              single-line
-                              hide-details
-                            ></v-text-field>
+                            <v-text-field
+                                v-model="searchDesc"
+                                append-icon="search"
+                                label="Поиск"
+                                single-line
+                                hide-details
+                              >
+                            </v-text-field>
+
+                            <v-data-table
+                                v-model="selectedDesc"
+                                :headers="descHeaders"
+                                :items="descsAll"
+                                :search="searchDesc"
+                                item-key="id"
+                                show-select
+                                single-select
+                                class="elevation-1"
+                              >
+                            </v-data-table>
                         </v-card-text>
-                        <v-data-table
-                            v-model="selectedDesc"
-                            :headers="descHeaders"
-                            :items="descsAll"
-                            :search="searchDesc"
-                            item-key="id"
-                            show-select
-                            single-select
-                            class="elevation-1"
-                          >
-                        </v-data-table>
                         <v-card-text>
                             <p style="color:red;" v-if="uploadDescError">{{ uploadDescError }}</p>
                             <v-btn class="prod-popup-btn" color="success" small @click="uploadDescFun">Загрузить выбранное описание</v-btn>
