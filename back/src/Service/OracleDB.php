@@ -5,7 +5,6 @@ namespace App\Service;
 class OracleDB
 {
 
-
     private $oracle;
     private $userID;
     private $userName;
@@ -346,7 +345,6 @@ class OracleDB
         'p_id_ppd', 'p_id_br', 'p_id_subsec', 
         'p_id_prop', 'p_id_gamma', 'p_cat_prior'];
 
-        
         if($arProdForm['p_id_form']){
             $sql = "SELECT FORM_NAME, ID_FORM, FORM_SH_NAME, FL_STATE FROM v_form WHERE ID_FORM = ".$arProdForm['p_id_form'];
             $sti = oci_parse($this->oracle, $sql); 

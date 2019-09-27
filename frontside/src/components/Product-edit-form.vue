@@ -512,10 +512,34 @@ export default {
               self.subSectionSelect = tempSubsect;
           }
         },
-        subsection: function(e)
+        subsection: function(e, oldE)
         {
             let self = this;
             let sectionStorage = this.$store.getters.sectionSelect;
+            if(!self.modalInit && self.propItems.length > 0 && self.cancel == "ASK")
+            {
+                if(!confirm('Вы уверены, что хотите изменить Раздел? Поле Подраздел будет очищено, прикрепленные Свойства будут удалены.'))
+                {   
+                    self.cancel = "CANCEL";
+                }
+            }
+            if(self.cancel == "SKIP")
+            {
+                self.cancel = "ASK";
+                return;
+            }
+            if(self.cancel == "CANCEL"){
+                oldE = (typeof oldE.value !== 'undefined') ? oldE.value : oldE;
+                self.subSectionSelect.forEach(function(elem){
+                    if(elem.value == oldE){
+                        oldE = {text: elem.text, value: elem.value};
+                    }
+                })
+                self.subsection = oldE;
+                self.cancel = "SKIP";
+                return;
+            }
+
             if(typeof sectionStorage !== 'undefined')
             {
                 sectionStorage.forEach(function(sect, indexSect){
@@ -603,7 +627,6 @@ export default {
         
         modalData: function(val)
         {//modal form init 
-            console.log(val);
             let self = this;
             self.saveErrors = false;
             self.modalInit = true;
@@ -799,7 +822,6 @@ export default {
           }
           if(foundCollapseIndex !== false)
           {//make loop from this shit
-              console.log( self.collapsedProducts.newProds[foundCollapseIndex]);
               self.collapsedProducts.newProds[foundCollapseIndex].prod_name = self.prod_name;
               self.collapsedProducts.newProds[foundCollapseIndex].catPrior = self.catPrior;
               self.collapsedProducts.newProds[foundCollapseIndex].brand = self.brand;
@@ -883,8 +905,7 @@ export default {
           } 
 
           dataProduct.append('auth', token);
-
-          dataProduct.append('brand', (typeof this.brand.value != 'undefined' ? this.brand.value : "" ));
+          dataProduct.append('brand', (typeof this.brand.value != 'undefined' ? this.brand.value : this.brand ));
           dataProduct.append('gamma', this.gammas);
           dataProduct.append('section', (typeof this.section.value != 'undefined' ? this.section.value : "" ));
           dataProduct.append('subsection', this.subsection);
@@ -1001,6 +1022,7 @@ export default {
     },
     data: () => {
       return {
+        cancel: "ASK",
         modalInit: false,
         saveErrors: false,
         displayName: '',
