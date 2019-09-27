@@ -16,15 +16,15 @@
           Название из Вита-системы: {{displayName}}
         </v-card-title>
         <v-card-text>
-          <v-switch v-model="isProductProcessed" v-bind:label="processStatus" color="success" hide-details disabled></v-switch>
+          <v-switch v-model="isProductProcessed" v-bind:label="processStatus" color="success" hide-details></v-switch>
         </v-card-text>
 
         <v-form lazy-validation>
         <v-card-text>
           <v-btn class="prod-popup-btn" color="success" @click="saveProduct">Записать и закрыть</v-btn>
           <v-btn class="prod-popup-btn" color="warning" @click="closeProduct">Закрыть без изменений</v-btn>
-          <v-alert type="error" class="saveError">
-              I'm an error alert.
+          <v-alert type="error" class="saveError" v-if="saveErrors">
+              {{saveErrors}}
           </v-alert>
         </v-card-text>
         <v-tabs centered>
@@ -603,7 +603,9 @@ export default {
         
         modalData: function(val)
         {//modal form init 
+            console.log(val);
             let self = this;
+            self.saveErrors = false;
             self.modalInit = true;
             self.id_mp = val.id_mp;
             self.prod_name = val.prod_name;
@@ -616,6 +618,7 @@ export default {
             self.formProd = typeof val.formProd != 'undefined' ? val.formProd : "";
             self.formProdShort = typeof val.formProdShort != 'undefined' ? val.formProdShort : "";
             self.propItems = typeof val.propItems != 'undefined' ? val.propItems : [];
+            self.mnnItems = typeof val.mnnItems != 'undefined' ? val.mnnItems : [];
             self.box = typeof val.box != 'undefined' ? val.box : "";
             self.manufactory = typeof val.manufactory != 'undefined' ? val.manufactory : "";
             self.formProd2 = typeof val.formProd2 != 'undefined' ? val.formProd2 : "";
@@ -655,7 +658,6 @@ export default {
                 self.methoduse = "";
                 self.howuse = "";
             }
-            console.log('test');
         }
     },
     methods: { 
@@ -851,13 +853,14 @@ export default {
       saveProduct: function()
       {
           //self.$store.commit('updateLoad', true);
+          let self = this;
           let token = cookie.methods.getCookie("token");
           let dataProduct = new FormData();
           dataProduct.append('id_mp', this.id_mp);
           dataProduct.append('prod_name', this.prod_name);
           dataProduct.append('box', this.box);
           dataProduct.append('manufactory', this.manufactory);
-          dataProduct.append('formprod', this.formProd2);
+          dataProduct.append('formProd2', this.formProd2);
           dataProduct.append('dosage', this.dosage);
           dataProduct.append('unit', this.unit);
           dataProduct.append('volume', this.volume);
@@ -869,20 +872,21 @@ export default {
           dataProduct.append('formProd', this.formProd);
           dataProduct.append('formProdShort', this.formProdShort);
           dataProduct.append('catPrior', this.catPrior);
+          dataProduct.append('isProductProcessed', this.isProductProcessed);
           if(typeof this.selectedDesc[0] != 'undefined' && typeof this.selectedDesc[0].id != 'undefined')
           {
               dataProduct.append('selectedDesc', this.selectedDesc[0].id);
           }
           else
           {
-              dataProduct.append('selectedDesc', false);
+              dataProduct.append('selectedDesc', "");
           } 
 
           dataProduct.append('auth', token);
 
-          dataProduct.append('brand', this.gammas);
-          dataProduct.append('gamma', (typeof this.brand.value != 'undefined' ? this.brand.value : false ));
-          dataProduct.append('section', (typeof this.section.value != 'undefined' ? this.section.value : false ));
+          dataProduct.append('brand', (typeof this.brand.value != 'undefined' ? this.brand.value : "" ));
+          dataProduct.append('gamma', this.gammas);
+          dataProduct.append('section', (typeof this.section.value != 'undefined' ? this.section.value : "" ));
           dataProduct.append('subsection', this.subsection);
  
           dataProduct.append('propItems', JSON.stringify(this.propItems));
@@ -893,12 +897,26 @@ export default {
                   self.$store.commit('updateLoad', false);
                   if(response.data == 'BAD_AUTH'){
                       router.push('login');
-                  }else{  
-                      console.log('yeee');
+                  }
+                  else if(typeof response.data.ERROR_EMPTY != 'undefined')
+                  { 
+                      self.saveErrors = 'Не заполнены обязательные поля: ' + response.data.ERROR_EMPTY.join(', ');
+                  }
+                  else if(typeof response.data.NOT_FOUND_FIELDS != 'undefined')
+                  { 
+                      self.saveErrors = 'Обнаружены ошибки в полях: ' + response.data.NOT_FOUND_FIELDS.join(' ');
+                  }
+                  else
+                  { 
+                      self.collapsedProducts.newProds.forEach(function(elem, key){
+                          if(elem.id_mp == self.id_mp){
+                              self.collapsedProducts.newProds.splice(key, 1);
+                          }
+                      }); 
+                      location.reload();
                   }
               }, 'post', dataProduct
           );
-
       }
     },
     computed: {
@@ -984,7 +1002,7 @@ export default {
     data: () => {
       return {
         modalInit: false,
-        saveErrors: [],
+        saveErrors: false,
         displayName: '',
         mnnHeaders: [
             { text: 'ID', value: 'id' },

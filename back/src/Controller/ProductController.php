@@ -12,6 +12,51 @@ use App\Service\OracleDB;
  */
 class ProductController extends ApiController
 {
+
+    private $sectionRequireFields = [
+        [
+            "name" => 'all',
+            "require" => ["prod_name" => 'Наименование', "section" => "Раздел", "subsection" => 'Подраздел',  
+                         "formProd" => 'Форма выпуска', "formProdShort" => 'Короткое название формы выпуска', 
+                         "manufactory" => 'Производитель'],
+        ],
+        [
+            "id" => 2,
+            "name" => 'Лекарства и Бады',
+            "require" => ["dosage" => 'Дозировка', "unit" => 'Единица измерения', 
+                          "volume" => 'Кол-во в упаковке'],
+        ], 
+        [
+            "id" => 1,
+            "name" => 'Активная косметика',
+            "require" => ["volume" => 'Кол-во в упаковке', "latinName" => 'Название на латинском', 
+                        "rusName" => 'Название на русском', "brand" => 'Бренд'],
+        ],
+        [
+            "id" => 3,
+            "name" => 'Мама и малыш',
+            "require" => ["brand" => 'Бренд', "unit" => 'Единица измерения', 
+                          "latinName" => 'Название на латинском', "rusName" => 'Название на русском'],
+        ],
+        [
+            "id" => 4,
+            "name" => 'Медицинские приборы',
+            "require" => ["latinName" => 'Название на латинском', "rusName" => 'Название на русском',
+                          "brand" => 'Бренд'],
+        ],
+        [
+            "id" => 5,
+            "name" => 'Ортопедия',
+            "require" => ["brand" => 'Бренд', "volume" => 'Кол-во в упаковке', 
+                          "latinName" => 'Название на латинском', "rusName" => 'Название на русском'],
+        ],
+        [
+            "id" => 232,
+            "name" => 'Красота и здоровье',
+            "require" => ["brand" => 'Бренд', "volume" => 'Кол-во в упаковке', 
+                          "latinName" => 'Название на латинском', "rusName" => 'Название на русском'],
+        ]
+    ];
     /**
     * @Route("/new-product",  methods={"GET"})
     */
@@ -141,29 +186,38 @@ class ProductController extends ApiController
 
         $oracleDB = new OracleDB($userData->getId(), $userData->getFullname());
         $arProps = json_decode($request->request->get('propItems'));
+        $propsIds = [];
         if(!empty($arProps)){
             foreach($arProps as $prop)
             {
                 $arParamsProps[] = [
                     'p_id_mp' => $request->request->get('id_mp'),
-                    'p_id_br' => false,
+                    'p_id_br' => $request->request->get('brand'),
                     'p_id_subsec' => $request->request->get('subsection'),
                     'p_id_prop' => $prop->id,
-                    'p_id_gamma' => false,
+                    'p_id_gamma' => $request->request->get('gamma'),
                 ];
+                if(!empty($prop->id)){
+                    $propsIds[] = $prop->id;
+                }
             }
+        }else{
+            $arParamsProps[] = [
+                'p_id_mp' => $request->request->get('id_mp'),
+                'p_id_br' => $request->request->get('brand'),
+                'p_id_subsec' => $request->request->get('subsection'),
+                'p_id_prop' => false,
+                'p_id_gamma' => $request->request->get('gamma'),
+            ];
         }
-        $arParamsProps[] = [
-            'p_id_mp' => $request->request->get('id_mp'),
-            'p_id_br' => $request->request->get('brand'),
-            'p_id_subsec' => $request->request->get('subsection'),
-            'p_id_prop' => false,
-            'p_id_gamma' => $request->request->get('gamma'),
-        ];
         $arMnns = json_decode($request->request->get('mnnItems'));
+        $mnnsIds = [];
         foreach($arMnns as &$val)
         {
             $val->id_mp = $request->request->get('id_mp');
+            if($val->id){
+                $mnnsIds[] = $val->id;
+            }
         }
         $arParams = [
             'p_id_mp' => $request->request->get('id_mp'),
@@ -177,13 +231,14 @@ class ProductController extends ApiController
             'p_sc_text' => $request->request->get('storageCond'),
             'p_lat_name' => $request->request->get('latinName'),
             'p_recipe' => $request->request->get('isRecipeNeeded') ? 1 : 0,
-            'p_is_correct' => 1,
+            'p_is_correct' => $request->request->get('isProductProcessed') ? 1 : 0,
             'p_rus_name' => $request->request->get('rusName'),
             'p_is_br_nm' => 0,
             'p_cat_prior' => $request->request->get('catPrior') ? 1 : 0,
             'p_id_form' => $request->request->get('formProd'),
             'p_id_ppd' => $request->request->get('selectedDesc'),
         ];
+    
         $arProdForm = [];
         if($arParams['p_id_form'] && $request->request->get('formProdShort'))
         {
@@ -192,7 +247,63 @@ class ProductController extends ApiController
                 'p_form_shnm' => $request->request->get('formProdShort'),
             ];
         }
+        $errorEmpty = [];
+        foreach($this->sectionRequireFields as $data)
+        {
+            if($data['name'] == 'all')
+            {
+                foreach($data['require'] as $fieldCode => $fieldName)
+                {
+                    if(empty(trim($request->request->get($fieldCode)))){
+                        $errorEmpty[] = $fieldName;
+                    }
+                }
+            }
+            elseif($data['id'] && $data['id'] == $request->request->get('section'))
+            {
+                foreach($data['require'] as $fieldCode => $fieldName)
+                {
+                    if(empty(trim($request->request->get($fieldCode)))){
+                        $errorEmpty[] = $fieldName;
+                    }
+                }
+            }
+        }
+        if(!empty($errorEmpty))
+        {
+            return $this->respond(['ERROR_EMPTY' => $errorEmpty]);
+        }
+        $resultCheckFields = $oracleDB->checkFields(
+            $request->request->get('id_mp'), 
+            $request->request->get('brand'),
+            $request->request->get('gamma'), 
+            $propsIds, 
+            $request->request->get('section'), 
+            $request->request->get('subsection'), 
+            $request->request->get('formProd'),
+            $request->request->get('selectedDesc'),
+            $mnnsIds
+        );
+        if(!empty($resultCheckFields))
+        {
+            return $this->respond(['NOT_FOUND_FIELDS' => $resultCheckFields]);
+        }
+
         $oracleDB->saveNewProd($arParams, $arParamsProps, $arMnns, $arProdForm);
+        $qb = $em->createQueryBuilder();
+        $inWork = $qb->select('i')
+                ->from(InWork::class, 'i')
+                ->where(
+                    $qb->expr()->gt('i.timeWork', time())
+                )
+                ->andWhere('i.objID = :prodID')
+                ->setParameter('prodID', $request->request->get('id_mp'))
+                ->getQuery()
+                ->getOneOrNullResult();  
+        if($inWork){
+            $em->remove($inWork);
+            $em->flush();
+        }      
         return $this->respond('SAVED');
     }
 

@@ -241,12 +241,111 @@ class OracleDB
         return $res;  
     }
 
+
+    public function checkFields($id_mp, $brand = false, $gamma = false, $propsIds = false, 
+                                $section = false, $subsection = false, $formProd = false, 
+                                $selectedDesc = false
+    )
+    {
+        $errors = [];
+        $sql = "SELECT COUNT(*) FROM v_new_goods WHERE ID_MP = $id_mp";
+        $sti = oci_parse($this->oracle, $sql);
+        oci_execute($sti);
+        $result = oci_fetch_assoc($sti);
+        if($result['COUNT(*)'] < 1)
+        {
+            $errors[] = "Товара c id_mp = $id_mp не найдено в новых товарах.";
+        }
+        if($brand)
+        {
+            $sql = "SELECT COUNT(*) FROM v_brand WHERE ID_BR = $brand";
+            $sti = oci_parse($this->oracle, $sql);
+            oci_execute($sti);
+            $result = oci_fetch_assoc($sti);
+            if($result['COUNT(*)'] < 1)
+            {
+                $errors[] = "Бренда c ID_BR = $brand не найдено в брендах.";
+            }
+        }
+        if($gamma)
+        {
+            $sql = "SELECT COUNT(*)  FROM v_gamma WHERE ID_GAMMA = $gamma";
+            $sti = oci_parse($this->oracle, $sql);
+            oci_execute($sti);
+            $result = oci_fetch_assoc($sti);
+            if($result['COUNT(*)'] < 1)
+            {
+                $errors[] = "Гаммы c ID_GAMMA = $gamma не найдено в гаммах.";
+            }
+        }
+        if(!empty($propsIds))
+        {
+            foreach($propsIds as $idProp)
+            {
+                $sql = "SELECT COUNT(*) FROM v_subsec_group WHERE ID_PROP = $idProp";
+                $sti = oci_parse($this->oracle, $sql);
+                oci_execute($sti);
+                $result = oci_fetch_assoc($sti);
+                if($result['COUNT(*)'] < 1)
+                {
+                    $errors[] = "Свойства c ID_PROP = $idProp не найдено в свойствах.";
+                }            
+            }
+        }
+        if($section)
+        {
+            $sql = "SELECT COUNT(*) FROM v_sections WHERE ID_SECTION = $section";
+            $sti = oci_parse($this->oracle, $sql);
+            oci_execute($sti);
+            $result = oci_fetch_assoc($sti);
+            if($result['COUNT(*)'] < 1)
+            {
+                $errors[] = "Раздела c ID_SECTION = $section не найдено в разделах.";
+            }
+        }
+        if($subsection)
+        {
+            $sql = "SELECT COUNT(*) FROM v_subsection WHERE ID_SUBSEC = $subsection";
+            $sti = oci_parse($this->oracle, $sql);
+            oci_execute($sti);
+            $result = oci_fetch_assoc($sti);
+            if($result['COUNT(*)'] < 1)
+            {
+                $errors[] = "Подраздела c ID_SUBSEC = $subsection не найдено в подразделах.";
+            }
+        }
+        if($formProd)
+        {
+            $sql = "SELECT COUNT(*) FROM v_form WHERE ID_FORM = $formProd";
+            $sti = oci_parse($this->oracle, $sql);
+            oci_execute($sti);
+            $result = oci_fetch_assoc($sti);
+            if($result['COUNT(*)'] < 1)
+            {
+                $errors[] = "Формы выпуска c ID_FORM = $formProd не найдено в формах выпуска.";
+            }
+        }
+        if($selectedDesc)
+        {
+            $sql = "SELECT COUNT(*) FROM v_pp_description WHERE ID_PPD = $selectedDesc";
+            $sti = oci_parse($this->oracle, $sql);
+            oci_execute($sti);
+            $result = oci_fetch_assoc($sti);
+            if($result['COUNT(*)'] < 1)
+            {
+                $errors[] = "Описания c ID_PPD = $selectedDesc не найдено в описаниях.";
+            }
+        }
+        return $errors;
+    }
+
     public function saveNewProd($arParams, $arParamsProps, $arMnns, $arProdForm)
     {
         $integers = ['p_id_mp', 'p_recipe', 'p_is_correct', 
         'p_is_br_nm', 'p_cat_prior', 'p_id_form',
         'p_id_ppd', 'p_id_br', 'p_id_subsec', 
         'p_id_prop', 'p_id_gamma', 'p_cat_prior'];
+
         
         if($arProdForm['p_id_form']){
             $sql = "SELECT FORM_NAME, ID_FORM, FORM_SH_NAME, FL_STATE FROM v_form WHERE ID_FORM = ".$arProdForm['p_id_form'];
@@ -260,7 +359,7 @@ class OracleDB
                 try {
                     @oci_execute($sti);
                 } catch (Exception $e){unset($e);}
-            }            
+            }          
         }
         foreach($arMnns as $data)
         {
